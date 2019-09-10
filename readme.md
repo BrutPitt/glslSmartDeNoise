@@ -6,7 +6,7 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 - Standard Deviations
 - Edge sharpening threshold
 
-[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)](https://youtu.be/_R7akPh64XU)
+[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)
 
 Filter is all here
 ``` glsl
@@ -65,11 +65,11 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float devStd, float thres
 ### Live WebGL2 demo
 
 You can run/test **WebGL 2** examples of **imGuIZMO** from following links:
-- [imGuIZMO ImGui widget + 3D (dolly/zoom) screen manipulator](https://www.michelemorrone.eu/emsExamples/qjSetScreen.html)
-- [imGuIZMO ImGui widget manipulator (only)](https://www.michelemorrone.eu/emsExamples/qjSetWidget.html)
+- **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
 
 
-There is way to test all available options and settings.
+There is way to test the filter changing parameters.
+
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
 
 Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.com/?v=2)
@@ -79,7 +79,7 @@ Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.
 
 ### Building Example
 
-The example shown in the screenshot is provided.
+The C++ example shown in the screenshot is provided.
 To build it you can use CMake (3.10 or higher) or the Visual Studio solution project (for VS 2017/2019) in Windows.
 You need to have installed [**GLFW**](https://www.glfw.org/) in your compiler search path (LIB/INCLUDE).
 Other tools: [**ImGui**](https://github.com/ocornut/imgui) and [**lodePNG**](https://github.com/lvandeve/lodepng) are attached, and already included in the project/CMakeList.txt
