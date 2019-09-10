@@ -2,8 +2,8 @@
 
 Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/flexible -> full configurable:
 
-- Sigma radius
-- Standard Deviations
+- Standard Deviation sigma radius
+- K factor sigma coefficient
 - Edge sharpening threshold
 
 [![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)
@@ -21,15 +21,20 @@ Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.
 **glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (is the *"bilinear threshold"* filter in the GLOW section)
 
 ## glslSmartDeNoise filter
-Below there is the filter with parameters and optimizations description
+Below there is the filter source code with parameters and optimizations description.
+
+To examine its use, you can watch the `Shader\frag.glsl` file, while all other files are only part of the **C++** example
 
 ``` glsl
+#define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
+#define INV_PI 0.31830988618379067153776752674503
+
 //  smartDeNoise - parameters
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  sampler2D tex     - sampler image / texture
 //  vec2 uv           - actual fragment coord
-//  float sigma  >  0 - sigma Standard Deviations
+//  float sigma  >  0 - sigma Standard Deviation
 //  float kSigma >= 0 - sigma coefficient 
 //      kSigma * sigma  -->  radius of the circular kernel
 //  float threshold   - Edge sharpening threshold 
@@ -139,14 +144,16 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 //
 
 ```
-**can find it also in* `frag.glsl` *file in to* `Shader` *directory*
+**can find it also in* `Shader/frag.glsl` *file*
 
 ### Building Example
 
 The C++ example shown in the screenshot is provided.
 To build it you can use CMake (3.10 or higher) or the Visual Studio solution project (for VS 2017/2019) in Windows.
 You need to have installed [**GLFW**](https://www.glfw.org/) in your compiler search path (LIB/INCLUDE).
-Other tools: [**ImGui**](https://github.com/ocornut/imgui) and [**lodePNG**](https://github.com/lvandeve/lodepng) are attached, and already included in the project/CMakeList.txt
+Other tools: [**ImGui**](https://github.com/ocornut/imgui) and [**lodePNG**](https://github.com/lvandeve/lodepng) are attached, and already included in the `CMakeList.txt`
+
+*Currently `CMakeList.txt` was tested only to build ONLY [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) example, other O.S. will be tested soon.*
 
 The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher): look at or use the helper batch/script files, in main example folder, to pass appropriate defines/patameters to CMake command line.
 
