@@ -86,7 +86,7 @@ void deNoiseClass::render()
     glUniform1f(locSigma, sigma); 
     glUniform1f(locThreshold, threshold);
     glUniform1f(locSlider, slider); 
-    glUniform1f(locDevStd, devStd); 
+    glUniform1f(locKSigma, kSigma); 
     glUniform2f(locWSize,theApp->GetWidth(),theApp->GetHeight());
 
 #ifdef __EMSCRIPTEN__

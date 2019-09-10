@@ -8,23 +8,35 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 
 [![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)
 
-Filter is all here
+### Live WebGL2 demo
+
+You can run/test **WebGL 2** examples of **imGuIZMO** from following links:
+- **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
+
+
+It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
+
+Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.com/?v=2)
+
+**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (is the *"bilinear threshold"* filter in the GLOW section)
+
+## glslSmartDeNoise filter
+Below there is the filter with parameters and optimizations description
+
 ``` glsl
+//  smartDeNoise - parameters
 ///////////////////////////////////////////////////////////////////////////////
-//
-//  deNoise - smartDeNoise
 //
 //  sampler2D tex     - sampler image / texture
 //  vec2 uv           - actual fragment coord
-//  float sigma  > 0  - sigma distribution
-//  float devStd >= 0 - Standard Deviations 
-//      devStd * sigma  -->  radius of the circular kernel
+//  float sigma  >  0 - sigma Standard Deviations
+//  float kSigma >= 0 - sigma coefficient 
+//      kSigma * sigma  -->  radius of the circular kernel
 //  float threshold   - Edge sharpening threshold 
-//
-///////////////////////////////////////////////////////////////////////////////
-vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float devStd, float threshold)
+
+vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
-    float radius = round(devStd*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
+    float radius = round(kSigma*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
     float radQ = radius * radius;
     
     float invSigma = 1.f/sigma;
@@ -39,7 +51,7 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float devStd, float thres
     
     float Zbuff = 0.0;
     vec4 accumBuff = vec4(0.0);
-    vec2 size = textureSize(tex, 0);
+    vec2 size = vec2(textureSize(tex, 0));
     
     for(float x=-radius; x <= radius; x++)	{
         float pt = sqrt(radQ-x*x);
@@ -60,22 +72,74 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float devStd, float thres
     return accumBuff/Zbuff;
 }
 
+//  About Standard Deviations
+///////////////////////////////////////////////////////////////////////////////
+//
+//  kSigma = 1*sigma cover 68% of data
+//  kSigma = 2*sigma cover 95% of data - over 3 times more points to compute
+//  kSigma = 3*sigma cover 99.7% of data - more over 2 times more points 
+
+
+//  Optimizations (description)
+///////////////////////////////////////////////////////////////////////////////
+//
+//  fX = exp( -(x*x) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 
+//  fY = exp( -(y*y) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 
+//  where...
+//      invSigmaSqx2     = 1.0 / (sigma^2 * 2.0)
+//      invSigmaxSqrt2PI = 1.0 / (sqrt(2 * PI) * sigma)
+//
+//  now, fX*fY can be written in unique expression...
+//
+//      e^(a*X) * e^(a*Y) * c*c
+//
+//      where:
+//        a = invSigmaSqx2, X = (x*x), Y = (y*y), c = invSigmaxSqrt2PI
+//
+//           -[(x*x) * 1/(2 * sigma^2)]             -[(y*y) * 1/(2 * sigma^2)] 
+//          e                                      e
+//  fX = -------------------------------    fY = -------------------------------
+//                ________                               ________
+//              \/ 2 * PI  * sigma                     \/ 2 * PI  * sigma
+//
+//      now with... 
+//        a = 1/(2 * sigma^2), 
+//        X = (x*x) 
+//        Y = (y*y) ________
+//        c = 1 / \/ 2 * PI  * sigma
+//
+//      we have...
+//              -[aX]              -[aY]
+//        fX = e      * c;   fY = e      * c;
+//
+//      and...
+//                 -[aX + aY]    [2]     -[a(X + Y)]    [2]
+//        fX*fY = e           * c     = e            * c   
+//
+//      well...
+//
+//                    -[(x*x + y*y) * 1/(2 * sigma^2)]
+//                   e                                
+//        fX*fY = --------------------------------------
+//                                        [2]           
+//                          2 * PI * sigma           
+//      
+//      now with assigned constants...
+//
+//          invSigmaQx2   = 1/(2 * sigma^2)
+//          invSigmaQx2PI = 1/(2 * PI * sigma^2) = invSigmaQx2 * INV_PI 
+//
+//      and the kernel vector 
+//
+//          k = vec2(x,y)
+//
+//      we can write:
+//
+//          fXY = exp( -dot(k,k) * invSigmaQx2) * invSigmaQx2PI
+//
+
 ```
-
-### Live WebGL2 demo
-
-You can run/test **WebGL 2** examples of **imGuIZMO** from following links:
-- **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
-
-
-There is way to test the filter changing parameters.
-
-It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
-
-Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.com/?v=2)
-
-**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (is the *"bilinear threshold"* filter in the GLOW section)
-
+**can find it also in* `frag.glsl` *file in to* `Shader` *directory*
 
 ### Building Example
 

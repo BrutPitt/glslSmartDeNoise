@@ -148,7 +148,7 @@ public:
         locThreshold = glGetUniformLocation(program, "uThreshold");
         locWSize = glGetUniformLocation(program, "wSize");
         locSlider = glGetUniformLocation(program, "uSlider");
-        locDevStd = glGetUniformLocation(program, "uDevStd");
+        locKSigma = glGetUniformLocation(program, "uKSigma");
 
 #if !defined(GLAPP_REQUIRE_OGL45)
         useProgram();
@@ -207,12 +207,12 @@ public:
     uDataStruct &getUData() { return uData; }
 
     GLfloat sigma = 7.0f, threshold = .180f, slider = 0.f;
-    GLfloat devStd = 2.f;
+    GLfloat kSigma = 2.f;
 
 private:
     textureBaseClass texture;
 
-    GLuint locSigma,locThreshold, locWSize, locSlider, locDevStd;
+    GLuint locSigma,locThreshold, locWSize, locSlider, locKSigma;
     vaoClass vao;
 
 };

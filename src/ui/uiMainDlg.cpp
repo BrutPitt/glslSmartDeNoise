@@ -87,7 +87,7 @@ void mainImGuiDlgClass::renderImGui()
             const float half = (w-x)/2.f - 6;
             ImGui::PushItemWidth(half);
             //ImGui::DragFloat("##DevStd",&theWnd->getDeNoise().devStd,.05,1.0,3.0,"DevStd: %.3f");
-            ImGui::SliderFloat("##DevStd",&theWnd->getDeNoise().devStd,0.0,3.0,"DevStd %.2f");
+            ImGui::SliderFloat("##DevStd",&theWnd->getDeNoise().kSigma,0.0,3.0,"DevStd %.2f");
             ImGui::PopItemWidth();
 
             ImGui::SameLine();

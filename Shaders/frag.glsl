@@ -31,7 +31,7 @@ out vec4 color;
 uniform float uSigma;
 uniform float uThreshold;
 uniform float uSlider;
-uniform float uDevStd;
+uniform float uKSigma;
 uniform vec2 wSize;
 
 #define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
@@ -42,9 +42,9 @@ uniform vec2 wSize;
 //
 //  sampler2D tex     - sampler image / texture
 //  vec2 uv           - actual fragment coord
-//  float sigma  > 0  - sigma distribution
-//  float devStd >= 0 - Standard Deviations 
-//      devStd * sigma  -->  radius of the circular kernel
+//  float sigma  >  0 - sigma Standard Deviations
+//  float kSigma >= 0 - sigma coefficient 
+//      kSigma * sigma  -->  radius of the circular kernel
 //  float threshold   - Edge sharpening threshold 
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,15 +107,15 @@ uniform vec2 wSize;
 //
 //  About Standard Deviations
 //
-// devStd = 1 cover 68% of data
-// devStd = 2 cover 95% of data - over 3 times more points to compute
-// devStd = 3 cover 99.7% of data - more over 2 times more points 
+// kSigma = 1*sigma cover 68% of data
+// kSigma = 2*sigma cover 95% of data - over 3 times more points to compute
+// kSigma = 3*sigma cover 99.7% of data - more over 2 times more points 
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float devStd, float threshold)
+vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
-    float radius = round(devStd*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
+    float radius = round(kSigma*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
     float radQ = radius * radius;
     
     float invSigma = 1.f/sigma;
@@ -158,7 +158,7 @@ void main(void)
     vec2 uv = vec2(gl_FragCoord.xy / wSize);    
 
     color = uv.x<slide-szSlide  ? texture(imageData, vec2(uv.x,1.0-uv.y)) 
-          : (uv.x>slide+szSlide ? smartDeNoise(imageData, vec2(uv.x,1.0-uv.y), uSigma, uDevStd, uThreshold) 
+          : (uv.x>slide+szSlide ? smartDeNoise(imageData, vec2(uv.x,1.0-uv.y), uSigma, uKSigma, uThreshold) 
           :  vec4(1.0));
 
 } 
