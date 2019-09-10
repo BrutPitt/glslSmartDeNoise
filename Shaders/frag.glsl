@@ -118,13 +118,11 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     float radius = round(kSigma*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
     float radQ = radius * radius;
     
-    float invSigma = 1.f/sigma;
-    float invSigmaQx2 = .5 * invSigma * invSigma;  // 1.0 / (sigma^2 * 2.0)
+    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
     float invSigmaQx2PI = INV_PI * invSigmaQx2;    // 1.0 / (sqrt(PI) * sigma)
     
-    float invThreshold = 1.f/threshold;
-    float invThresholdSqx2 = .5 * invThreshold * invThreshold;     // 1.0 / (sigma^2 * 2.0)
-    float invThresholdSqrt2PI = INV_SQRT_OF_2PI * invThreshold;    // 1.0 / (sqrt(2*PI) * sigma)
+    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
+    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma)
     
     vec4 centrPx = texture(tex,uv); 
     
