@@ -10,7 +10,7 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 
 ### Live WebGL2 demo
 
-You can run/test **WebGL 2** examples of **imGuIZMO** from following links:
+You can run/test **WebGL 2** examples of **glslSmartDeNoise** from following links:
 - **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
 
 
@@ -18,7 +18,8 @@ It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/
 
 Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.com/?v=2)
 
-**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (is the *"bilinear threshold"* filter in the GLOW section)
+**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (it's the *"bilinear threshold"* filter in GLOW section)
+You can watch a graphical example at **[glChAoS.P *glow threshold* effect](https://www.michelemorrone.eu/glchaosp/glowEffects.html)** link
 
 ## glslSmartDeNoise filter
 Below there is the filter source code with parameters and optimizations description.
@@ -37,7 +38,7 @@ To examine its use, you can watch the `Shader\frag.glsl` file, while all other f
 //  float sigma  >  0 - sigma Standard Deviation
 //  float kSigma >= 0 - sigma coefficient 
 //      kSigma * sigma  -->  radius of the circular kernel
-//  float threshold   - Edge sharpening threshold 
+//  float threshold   - edge sharpening threshold 
 
 vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
@@ -58,8 +59,8 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     vec4 accumBuff = vec4(0.0);
     vec2 size = vec2(textureSize(tex, 0));
     
-    for(float x=-radius; x <= radius; x++)	{
-        float pt = sqrt(radQ-x*x);
+    for(float x=-radius; x <= radius; x++) {
+        float pt = sqrt(radQ-x*x);  // pt = yRadius: have circular trend
         for(float y=-pt; y <= pt; y++) {
             vec2 d = vec2(x,y)/size;
 
@@ -77,12 +78,14 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     return accumBuff/Zbuff;
 }
 
-//  About Standard Deviations
+//  About Standard Deviations (watch Gauss curve)
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  kSigma = 1*sigma cover 68% of data
-//  kSigma = 2*sigma cover 95% of data - over 3 times more points to compute
-//  kSigma = 3*sigma cover 99.7% of data - more over 2 times more points 
+//  kSigma = 2*sigma cover 95% of data - but there are over 3 times 
+//                   more points to compute
+//  kSigma = 3*sigma cover 99.7% of data - but needs more than double 
+//                   the calculations of 2*sigma
 
 
 //  Optimizations (description)
