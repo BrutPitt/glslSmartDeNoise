@@ -95,7 +95,7 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
             vec4 dC = walkPx-centrPx;
             float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
                                  
-            zBuff     += deltaFactor;
+            zBuff += deltaFactor;
             aBuff += deltaFactor*walkPx;
         }
     }
