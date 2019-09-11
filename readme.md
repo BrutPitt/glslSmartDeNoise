@@ -10,7 +10,7 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)|
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html) |
+| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html) |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)|
 
@@ -23,7 +23,7 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 
 You can run/test **WebGL 2** examples of **glslSmartDeNoise** also from following links:
 - **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
-- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html)**
+- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
 - **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
 
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
@@ -79,8 +79,8 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     
     vec4 centrPx = texture(tex,uv); 
     
-    float Zbuff = 0.0;
-    vec4 accumBuff = vec4(0.0);
+    float zBuff = 0.0;
+    vec4 aBuff = vec4(0.0);
     vec2 size = vec2(textureSize(tex, 0));
     
     for(float x=-radius; x <= radius; x++) {
@@ -95,11 +95,11 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
             vec4 dC = walkPx-centrPx;
             float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
                                  
-            Zbuff     += deltaFactor;
-            accumBuff += deltaFactor*walkPx;
+            zBuff     += deltaFactor;
+            aBuff += deltaFactor*walkPx;
         }
     }
-    return accumBuff/Zbuff;
+    return aBuff/zBuff;
 }
 ```
  Below there are considerations about parameters utilization and the optimizations description.

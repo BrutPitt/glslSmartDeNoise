@@ -45,7 +45,7 @@ uniform vec2 wSize;
 
 vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
-    float radius = round(kSigma*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
+    float radius = round(kSigma*sigma);
     float radQ = radius * radius;
     
     float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
@@ -56,8 +56,8 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     
     vec4 centrPx = texture(tex,uv); 
     
-    float Zbuff = 0.0;
-    vec4 accumBuff = vec4(0.0);
+    float zBuff = 0.0;
+    vec4 aBuff = vec4(0.0);
     vec2 size = vec2(textureSize(tex, 0));
     
     for(float x=-radius; x <= radius; x++) {
@@ -72,11 +72,11 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
             vec4 dC = walkPx-centrPx;
             float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
                                  
-            Zbuff     += deltaFactor;
-            accumBuff += deltaFactor*walkPx;
+            zBuff     += deltaFactor;
+            aBuff += deltaFactor*walkPx;
         }
     }
-    return accumBuff/Zbuff;
+    return aBuff/zBuff;
 }
 
 //  About Standard Deviations (watch Gauss curve)

@@ -195,11 +195,12 @@ add_executable(${PROJECT_NAME}
 
 if(OPENGL_FOUND)
     if(APPLE)
-        set(TARGET_LIBS "-lglfw3 -lpthread -ldl")
+        set(TARGET_LIBS "-lglfw3 -ldl")
     else()
         if(WIN32)
+        set(TARGET_LIBS "-lglfw3 -ldl")
         else()    
-        set(TARGET_LIBS "-lglfw -lpthread -ldl -lX11")
+        set(TARGET_LIBS "-lglfw -ldl -lX11")
         endif(WIN32)
     endif(APPLE)
 

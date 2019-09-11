@@ -56,14 +56,14 @@ void textureBaseClass::assignAttribs(GLint filterMin, GLint filterMag, GLint wra
 #endif
 }
 
-void textureBaseClass::buildTex(void *buffer, const ivec2 &size)
+void textureBaseClass::buildTex(void *buffer, const int x, const int y)
 {
     genTex();
     const GLint texInternal = GL_RGBA;
 
     glActiveTexture(GL_TEXTURE0 + texID);
     glBindTexture(GL_TEXTURE_2D, texID);			// Bind Our Texture
-    glTexImage2D(GL_TEXTURE_2D, 0, texInternal, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, texInternal, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
     assignAttribs(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     CHECK_GL_ERROR();
@@ -133,7 +133,7 @@ glWindow::~glWindow()
 
 }
 
-#define IMG_IDX 0
+#define IMG_IDX 1
 
 //
 /////////////////////////////////////////////////
@@ -156,7 +156,7 @@ void glWindow::onInit()
     theApp->SetWidth(x); theApp->SetHeight(y);
     glViewport(0, 0, x, y);
     glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
-    getDeNoise().getTexture().buildTex(image.data(), size);
+    getDeNoise().getTexture().buildTex(image.data(), x, y);
     deNoise.initShader();
 }
 

@@ -15,13 +15,8 @@
 #ifdef GLAPP_USE_IMGUI
 
 #include <sstream>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/type_ptr.hpp>
 
-void setRotation(const glm::quat &q);
-glm::quat& getRotation();
 
 
 #include "../glApp.h"
@@ -29,7 +24,6 @@ glm::quat& getRotation();
 
 
 #include "uiMainDlg.h"
-using namespace glm;
 
 
     bool show_test_window = true;

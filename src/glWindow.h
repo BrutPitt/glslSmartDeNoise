@@ -13,12 +13,8 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/ext/scalar_constants.hpp>
 #include "glApp.h"
 
-using namespace glm;
 /*
 ///////////////////////////////////////////
 //Data Init for 32/64 bit systems
@@ -111,7 +107,7 @@ public:
 
     GLuint getTexID()   { return texID;   }
     GLuint getTexSize() { return texSize; }
-    void buildTex(void* buffer,const ivec2 &size);
+    void buildTex(void* buffer, const int x, const int y);
 
     GLuint texID  ;
     GLuint texSize =  0;
