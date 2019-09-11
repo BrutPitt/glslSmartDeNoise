@@ -6,24 +6,25 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 - K factor sigma coefficient
 - Edge sharpening threshold
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html) |
-| :-----: |
-|[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)|
-
-| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html) |
+| Live WebGL2 demo -> [glslSmartDeNoise Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html) |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)|
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html) |
+| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html) |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)|
+
+| Live WebGL2 demo -> [glslSmartDeNoise Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html) |
+| :-----: |
+|[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)|
+
 
 ### About live WebGL2 demos
 
 You can run/test **WebGL 2** examples of **glslSmartDeNoise** also from following links:
-- **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
-- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
-- **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html)**
+- **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
+- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html)**
+- **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
 
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
 
