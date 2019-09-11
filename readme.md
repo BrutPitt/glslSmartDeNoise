@@ -180,12 +180,19 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 
 The C++ example shown in the screenshot is provided.
 To build it you can use CMake (3.10 or higher) or the Visual Studio solution project (for VS 2017/2019) in Windows.
-You need to have installed [**GLFW**](https://www.glfw.org/) in your compiler search path (LIB/INCLUDE).
+You need to have installed [**GLFW**](https://www.glfw.org/) (v.3.3 or above) in your compiler search path (LIB/INCLUDE).
 Other tools: [**ImGui**](https://github.com/ocornut/imgui), [**lodePNG**](https://github.com/lvandeve/lodepng) and [**glad**](https://github.com/Dav1dde/glad) are attached, and already included in the project.
 
-*Currently `CMakeList.txt` was tested only to build ONLY [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) example, other O.S. will be tested soon.*
+To build with CMake use GUI and pay attention to GLFW library name: **glfw3** or **glfw** (in some linux distributions)
 
-The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher): look at or use the helper batch/script files, in main example folder, to pass appropriate defines/patameters to CMake command line.
+The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher) use GUI (and flag `BUILD_wglAPP` check) or execute the following command:
+
+``` bash
+cmake --target wglApp -DCMAKE_TOOLCHAIN_FILE:STRING=%EMSCRIPTEN%\cmake\Modules\Platform\Emscripten.cmake -DCMAKE_BUILD_TYPE:STRING=%BUILD_TYPE% -DBUILD_wglAPP:BOOL=TRUE -G "MinGW Makefiles" .
+```
+where:
+- `%EMSCRIPTEN%` is your emscripten installation path (e.g. `C:\emsdk\emscripten\1.38.8`)
+- `%BUILD_TYPE%` is build type: `Debug | Release | RelWithDebInfo | MinSizeRel` 
 
 To build the EMSCRIPTEN version, in Windows, with CMake, need to have **mingw32-make.exe** in your computer and search PATH (only the make utility is enough): it is a condition of EMSDK tool to build with CMake in Windows.
 

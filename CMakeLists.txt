@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-SET(BUILD_wglAPP TRUE CACHE BOOL TRUE)
+SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
 ###########################################################
 #
 # *** CHANGES NOTE ***
@@ -146,16 +146,6 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 #   PC setting
 ###########################################################
 else()
-#   Default best emitter type and OpenGL
-    if(NOT OGL_EMITTER_TYPE)
-        if(APPLE)
-            set(OGL_EMITTER_TYPE ${OGL41})
-        else()
-            set(OGL_EMITTER_TYPE ${OGL45})
-        endif()
-    endif()    
-
-
     if(APPLE)
         project(glApp_OSX)
     else()
@@ -180,7 +170,7 @@ else ()
 endif(OPENGL_FOUND)
 
 # set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/builds")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/..")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
 if(APPLE)
     set(COMMON_DEFINES "${BASE_DEFINES} -DGLFW_INCLUDE_NONE -DIMGUI_IMPL_OPENGL_LOADER_GLAD -Wno-logical-op-parentheses -Wno-unused-command-line-argument -Wno-parentheses -framework Cocoa -framework IOKit -framework CoreVideo")
@@ -194,21 +184,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security ${OGL_EMITTER_TYPE}
 include_directories(${SRC})
 include_directories(${SRC}/tools)
 include_directories(${SRC}/libs)
-include_directories($ENV{INCLUDE})
+# include_directories($ENV{INCLUDE})
 
 #uncomment for GLFW installed dir
-if(APPLE)
-    include_directories(src/libs/glfw/buildOSX/include)
-    link_directories(src/libs/glfw/buildOSX/lib)
-else()
-    if(WIN32)
-        include_directories(src/libs/glfw/buildWin/include)
-        link_directories(src/libs/glfw/buildWin/lib)
-    else()
-        include_directories(src/libs/glfw/buildLinux/include)
-        link_directories(src/libs/glfw/buildLinux/lib)
-    endif(WIN32)
-endif(APPLE)
 
 add_executable(${PROJECT_NAME} 
         ${SRC}/libs/glad/glad.cpp
@@ -221,7 +199,7 @@ if(OPENGL_FOUND)
     else()
         if(WIN32)
         else()    
-        set(TARGET_LIBS "-lglfw3 -lpthread -ldl -lX11")
+        set(TARGET_LIBS "-lglfw -lpthread -ldl -lX11")
         endif(WIN32)
     endif(APPLE)
 
