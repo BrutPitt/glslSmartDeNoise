@@ -33,9 +33,9 @@ Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.
 You can watch a graphical example at **[glChAoS.P *glow threshold* effect](https://www.michelemorrone.eu/glchaosp/glowEffects.html)** link
 
 ## glslSmartDeNoise filter
-Below there is the filter source code with parameters description.
+Below there is the filter source code with parameters description: this is everything you need.
 
-To examine its use, you can watch the `Shader\frag.glsl` file, while all other files are only part of the **C++** example
+To view its use you can also examine the `Shader\frag.glsl` file *(all other files are only part of the **C++** examples)*
 
 ``` glsl
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,7 +101,7 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     return accumBuff/Zbuff;
 }
 ```
- Below there are condsiderations about parameters and optimizations description.
+ Below there are considerations about parameters utilization and the optimizations description.
 ``` cpp
 
 //  About Standard Deviations (watch Gauss curve)
