@@ -67,7 +67,7 @@ To examine its use, you can watch the `Shader\frag.glsl` file, while all other f
 
 vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
-    float radius = round(kSigma*sigma);  // devStd = 2 -> 95% or 3 -> 99.7%
+    float radius = round(kSigma*sigma);
     float radQ = radius * radius;
     
     float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
