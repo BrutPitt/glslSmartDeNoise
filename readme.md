@@ -6,13 +6,24 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 - K factor sigma coefficient
 - Edge sharpening threshold
 
-[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot.jpg)
+| Live WebGL2 demo -> [glslSmartDeNoise Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html) |
+| :-----: |
+|[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)|
 
-### Live WebGL2 demo
+| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html) |
+| :-----: |
+|[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)|
 
-You can run/test **WebGL 2** examples of **glslSmartDeNoise** from following links:
-- **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
+| Live WebGL2 demo -> [glslSmartDeNoise Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html) |
+| :-----: |
+|[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)|
 
+### Live WebGL2 demos
+
+You can run/test **WebGL 2** examples of **glslSmartDeNoise** also from following links:
+- **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
+- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
+- **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL2/wglApp.html)**
 
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
 
@@ -27,27 +38,25 @@ Below there is the filter source code with parameters and optimizations descript
 To examine its use, you can watch the `Shader\frag.glsl` file, while all other files are only part of the **C++** example
 
 ``` glsl
-////////////////////////////////////////////////////////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  Copyright (c) 2018-2019 Michele Morrone
 //  All rights reserved.
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise
 //  https://michelemorrone.eu - https://BrutPitt.com
 //
-//  Twitter: @BrutPitt
+//  me@michelemorrone.eu - brutpitt@gmail.com
+//  twitter: @BrutPitt - github: BrutPitt
+//  
+//  https://github.com/BrutPitt/glslSmartDeNoise/
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//  
-////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
 #define INV_PI 0.31830988618379067153776752674503
 
 //  smartDeNoise - parameters
-///////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  sampler2D tex     - sampler image / texture
 //  vec2 uv           - actual fragment coord
@@ -93,7 +102,7 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 }
 
 //  About Standard Deviations (watch Gauss curve)
-///////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  kSigma = 1*sigma cover 68% of data
 //  kSigma = 2*sigma cover 95% of data - but there are over 3 times 
@@ -103,7 +112,7 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 
 
 //  Optimizations (description)
-///////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  fX = exp( -(x*x) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 
 //  fY = exp( -(y*y) * invSigmaSqx2 ) * invSigmaxSqrt2PI; 

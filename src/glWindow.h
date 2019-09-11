@@ -1,19 +1,16 @@
-////////////////////////////////////////////////////////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  Copyright (c) 2018-2019 Michele Morrone
 //  All rights reserved.
 //
-//  mailto:me@michelemorrone.eu
-//  mailto:brutpitt@gmail.com
-//  
-//  https://github.com/BrutPitt
+//  https://michelemorrone.eu - https://BrutPitt.com
 //
-//  https://michelemorrone.eu
-//  https://BrutPitt.com
+//  me@michelemorrone.eu - brutpitt@gmail.com
+//  twitter: @BrutPitt - github: BrutPitt
+//  
+//  https://github.com/BrutPitt/glslSmartDeNoise/
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//  
-////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma once
 
 #include <glm/glm.hpp>
@@ -206,8 +203,13 @@ public:
 
     uDataStruct &getUData() { return uData; }
 
-    GLfloat sigma = 7.0f, threshold = .180f, slider = 0.f;
+    GLfloat sigma = 11.0f, threshold = .180f, slider = 0.f; //running
+    // GLfloat sigma = 7.0f, threshold = .180f, slider = 0.f; //running
     GLfloat kSigma = 2.f;
+
+    GLfloat aSigma[3] = {9.f, 7.f, 7.f};
+    GLfloat aThreshold[3] = {.180f, .195f, .180f};
+    GLfloat aKSigma[3] = {3.f, 3.f, 2.f};
 
 private:
     textureBaseClass texture;

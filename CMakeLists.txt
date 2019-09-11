@@ -123,7 +123,7 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../ChaoticAttractors@ChaoticAttractors/\"\
 
     set(M_EMCC_EMBED_FILES "--preload-file \"${CMAKE_SOURCE_DIR}/Shaders@Shaders/\"\
-     --preload-file \"${CMAKE_SOURCE_DIR}/imageD.png@./\"")
+     --preload-file \"${CMAKE_SOURCE_DIR}/image0.png@./\"")
      
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../Fonts/Cousine-Regular.ttf@Fonts/\"\
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../Fonts/fontawesome-webfont.ttf@Fonts/\"\

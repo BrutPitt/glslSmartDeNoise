@@ -1,19 +1,16 @@
-////////////////////////////////////////////////////////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  Copyright (c) 2018-2019 Michele Morrone
 //  All rights reserved.
 //
-//  mailto:me@michelemorrone.eu
-//  mailto:brutpitt@gmail.com
-//  
-//  https://github.com/BrutPitt
+//  https://michelemorrone.eu - https://BrutPitt.com
 //
-//  https://michelemorrone.eu
-//  https://BrutPitt.com
+//  me@michelemorrone.eu - brutpitt@gmail.com
+//  twitter: @BrutPitt - github: BrutPitt
+//  
+//  https://github.com/BrutPitt/glslSmartDeNoise/
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//  
-////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -136,7 +133,7 @@ glWindow::~glWindow()
 
 }
 
-
+#define IMG_IDX 0
 
 //
 /////////////////////////////////////////////////
@@ -145,13 +142,18 @@ void glWindow::onInit()
     std::vector<unsigned char> image;
     unsigned x,y;
 
-    lodepng::decode(image, x, y, "imageD.png");
+    getDeNoise().sigma = getDeNoise().aSigma[IMG_IDX];
+    getDeNoise().threshold = getDeNoise().aThreshold[IMG_IDX];
+    getDeNoise().kSigma = getDeNoise().aKSigma[IMG_IDX];
+
+    char str[32];
+    sprintf(str,"image%d.png",IMG_IDX);
+    lodepng::decode(image, x, y, str);
     ivec2 size(x,y);
 
 
     //glViewport(0, 0, theApp->GetWidth(), theApp->GetWidth());
     theApp->SetWidth(x); theApp->SetHeight(y);
-    printf("%d, %d\n",x,y);
     glViewport(0, 0, x, y);
     glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
     getDeNoise().getTexture().buildTex(image.data(), size);
