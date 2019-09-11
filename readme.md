@@ -1,6 +1,6 @@
 # glslSmartDeNoise
 
-Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/flexible -> full configurable:
+Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/flexible/adaptable -> full configurable:
 
 - Standard Deviation sigma radius
 - K factor sigma coefficient
@@ -25,6 +25,7 @@ You can run/test **WebGL 2** examples of **glslSmartDeNoise** also from followin
 - **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
 - **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
 - **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
+- **[ShaderToy Example - porting to ShaderToy ](https://www.shadertoy.com/view/3dd3Wr)**
 
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
 
