@@ -142,6 +142,8 @@ void glWindow::onInit()
     std::vector<unsigned char> image;
     unsigned x,y;
 
+    deNoise = new deNoiseClass;
+
     getDeNoise().sigma = getDeNoise().aSigma[IMG_IDX];
     getDeNoise().threshold = getDeNoise().aThreshold[IMG_IDX];
     getDeNoise().kSigma = getDeNoise().aKSigma[IMG_IDX];
@@ -157,7 +159,7 @@ void glWindow::onInit()
     glViewport(0, 0, x, y);
     glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
     getDeNoise().getTexture().buildTex(image.data(), x, y);
-    deNoise.initShader();
+    getDeNoise().initShader();
 }
 
 
@@ -166,6 +168,7 @@ void glWindow::onInit()
 /////////////////////////////////////////////////
 void glWindow::onExit()
 {
+    delete deNoise;
     
 }
 
@@ -173,7 +176,7 @@ void glWindow::onExit()
 /////////////////////////////////////////////////
 void glWindow::onRender()
 {
-    deNoise.render();
+    getDeNoise().render();
 }
 
 
@@ -189,7 +192,7 @@ void glWindow::onIdle()
 /////////////////////////////////////////////////
 void glWindow::onReshape(GLint w, GLint h)
 {
-    deNoise.rescale(w,h);
+    getDeNoise().rescale(w,h);
 
 
 }

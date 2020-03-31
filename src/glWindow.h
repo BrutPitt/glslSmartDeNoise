@@ -266,11 +266,11 @@ public:
     int GetWidth()  { return GetCanvas()->GetWidth();  }
     int GetHeight() { return GetCanvas()->GetHeight(); }
 
-    deNoiseClass& getDeNoise() { return deNoise; }
+    deNoiseClass& getDeNoise() { return *deNoise; }
 
 private:
 
-    deNoiseClass deNoise;
+    deNoiseClass *deNoise;
 
 };
 
