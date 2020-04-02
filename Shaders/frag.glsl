@@ -60,18 +60,16 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
     vec4 aBuff = vec4(0.0);
     vec2 size = vec2(textureSize(tex, 0));
     
-    for(float x=-radius; x <= radius; x++) {
-        float pt = sqrt(radQ-x*x);  // pt = yRadius: have circular trend
-        for(float y=-pt; y <= pt; y++) {
-            vec2 d = vec2(x,y);
-
+    vec2 d;
+    for (d.x=-radius; d.x <= radius; d.x++) {
+        float pt = sqrt(radQ-d.x*d.x);
+        for (d.y=-pt; d.y <= pt; d.y++) {
             float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
-            
-            vec4 walkPx =  texture(tex,uv+d/size);
 
+            vec4 walkPx =  texture(tex,uv+d/size);
             vec4 dC = walkPx-centrPx;
             float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
-                                 
+
             zBuff += deltaFactor;
             aBuff += deltaFactor*walkPx;
         }
