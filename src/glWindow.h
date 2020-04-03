@@ -167,35 +167,7 @@ public:
         theApp->SetWidth(w); theApp->SetHeight(h);
     }
 
-/*
-    void zoom(bool isIn)
-    {
-        double scale = isIn ? -zoomFactor : zoomFactor;
 
-        double x,y;
-        glfwGetCursorPos(theApp->getGLFWWnd(), &x, &y);
-
-        uData.mScale.x *= 1.0+scale;
-        uData.mScale.y *= 1.0+scale;
-
-        const double ptX =  double((theApp->GetWidth() >>1) - x)/double(theApp->GetWidth() >>1) * scale;
-        const double ptY = -double((theApp->GetHeight()>>1) - y)/double(theApp->GetHeight()>>1) * scale;
-
-        uData.mTransp.x += ptX * uData.mScale.x;    
-        uData.mTransp.y += ptY * uData.mScale.y;
-
-        render();
-    }
-
-    void rescale(int w, int h)
-    {
-        uData.mScale.x+=(w-theApp->GetWidth() ) * uData.mScale.x/(double)theApp->GetWidth();
-        uData.mScale.y+=(h-theApp->GetHeight()) * uData.mScale.y/(double)theApp->GetHeight();
-        glViewport(0,0,w,h);
-        theApp->SetWidth(w); theApp->SetHeight(h);
-        render();
-    }
-*/
 
     uDataStruct &getUData() { return uData; }
 
