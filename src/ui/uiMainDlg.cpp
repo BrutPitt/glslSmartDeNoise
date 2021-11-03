@@ -31,7 +31,7 @@
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <ImGui/imgui_internal.h>
+#include <imgui/imgui_internal.h>
 using namespace ImGui;
 
 void mainImGuiDlgClass::renderImGui()

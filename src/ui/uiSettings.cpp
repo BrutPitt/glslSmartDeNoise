@@ -13,7 +13,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #ifdef GLAPP_USE_IMGUI
 
-#include <ImGui/imgui.h>
+#include <imgui/imgui.h>
 
 #include "../glApp.h"
 
