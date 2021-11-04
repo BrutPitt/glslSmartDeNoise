@@ -45,11 +45,7 @@ static void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int actio
 #endif
     } //glfwSetWindowShouldClose(window,GLFW_TRUE);
      
-    if(key == GLFW_KEY_PRINT_SCREEN && action == GLFW_PRESS) {
-        if(scancode & GLFW_MOD_CONTROL) {} // CTRL+PrtScr -> request FileName
-        if(!scancode)                   {} // CTRL+PrtScr -> TimeBased FileName
-    }
-    else if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F12 && action == GLFW_PRESS) {
+    if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F12 && action == GLFW_PRESS) {
         theWnd->onSpecialKeyDown(key, 0, 0);
 #ifndef __EMSCRIPTEN__
         if(key == GLFW_KEY_F11) toggleFullscreenOnOff(window);
@@ -239,7 +235,7 @@ void mainGLApp::imguiInit()
 
     //ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui_ImplGlfw_InitForOpenGL(mainGLFWwnd, false);
-    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_Init(USE_GLSL_VERSION);
     //ImGui::StyleColorsDark();
     setGUIStyle();
 }
@@ -266,19 +262,45 @@ void mainGLApp::glfwInit()
 #ifdef __EMSCRIPTEN__
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-#else       
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    #ifdef GLAPP_REQUIRE_OGL45 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+#else
+    #ifdef GLAPP_USES_ES3
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     #else
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        #ifdef GLAPP_REQUIRE_OGL45
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+        #else
+            #ifdef NDEBUG
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+            #else
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // to use DebugCallback
+            #endif
+        #endif
     #endif
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
+
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // from GLFW: If OpenGL ES is requested, this hint is ignored.
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // from GLFW: If OpenGL ES is requested, this hint is ignored.
 #endif    
+
+#if defined(GLAPP_USES_ES3)
+    // From GLFW:
+    //      X11: On some Linux systems, creating contexts via both the native and EGL APIs in a single process
+    //           will cause the application to segfault. Stick to one API or the other on Linux for now.
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API); //GLFW_NATIVE_CONTEXT_API
+#endif
+
     glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
-    //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    
+    glfwWindowHint(GLFW_DEPTH_BITS, 0); // rendering is on FBO, so disable DEPTH buffer of context
+
+#ifdef NDEBUG
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_CONTEXT_NO_ERROR);
+#else
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
 
     setGLFWWnd(glfwCreateWindow(GetWidth(), GetHeight(), getWindowTitle(), NULL, NULL));
     if (!getGLFWWnd())
@@ -311,10 +333,28 @@ void mainGLApp::glfwInit()
         });
 */
 #else
-    //Init OpenGL
-    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    #ifdef GLAPP_USES_ES3
+        gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress); //get OpenGL ES extensions
+    #else
+        gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);    //get OpenGL extensions
+    #endif
 #endif
 
+#ifndef NDEBUG
+/*
+    glEnable              ( GL_DEBUG_OUTPUT );
+    //glDebugMessageCallback( MessageCallback, nullptr );
+    glDebugMessageCallback( openglCallbackFunction, nullptr);
+*/
+    if(glDebugMessageCallback) {
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(openglCallbackFunction, nullptr);
+        GLuint unusedIds = 0;
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
+    }
+    else
+        cout << "glDebugMessageCallback not available: need OpenGL ES 3.2+ or OpenGL 4.3+" << endl;
+#endif
 
 
     glfwSetKeyCallback(getGLFWWnd(), glfwKeyCallback);

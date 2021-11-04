@@ -144,7 +144,7 @@ public:
         locKSigma = glGetUniformLocation(program, "uKSigma");
 
 #if !defined(GLAPP_REQUIRE_OGL45)
-        useProgram();
+        bindShaderProg();
         glUniform1i(glGetUniformLocation(program,"imageData"), getTexture().getTexID());
 
 #endif

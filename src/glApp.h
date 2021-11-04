@@ -13,8 +13,6 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma once
 
-#define GLAPP_USE_IMGUI
-
 //#define GLAPP_REQUIRE_OGL45
 
 //#include "glUtilities.h"
@@ -44,7 +42,7 @@
 
 #define GLAPP_SHADERS "Shaders/"
 
-#ifdef __EMSCRIPTEN__
+#if defined (__EMSCRIPTEN__) || defined (GLAPP_USES_ES3)
     #define USE_GLSL_VERSION   "#version 300 es\n\n"
     #define USE_GLSL_PRECISION "precision highp float;\n"
 #else
@@ -133,6 +131,7 @@ protected:
 
 		// The title of the window
 		std::string windowTitle;
+        std::string glslDefines;
     
     
 private:

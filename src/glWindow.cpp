@@ -11,8 +11,7 @@
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <vgMath.h>
 
 #include <lodePNG/lodepng.h>
 
@@ -74,7 +73,7 @@ void textureBaseClass::buildTex(void *buffer, const int x, const int y)
 void deNoiseClass::render()
 {
 
-    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f)));
+    glClearBufferfv(GL_COLOR, 0, value_ptr(vec4(0.0f)));
 
     bindPipeline();
 
@@ -105,7 +104,6 @@ void deNoiseClass::render()
 
 
 
-using namespace glm;
 
 void setView()
 {
