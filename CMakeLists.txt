@@ -2,26 +2,44 @@ cmake_minimum_required(VERSION 3.15)
 # SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
 ###########################################################
 #
-# *** CHANGES NOTE ***
-# Now ALL EMITTER TYPES are selectable inside program
-# Remain only differentiation on OpenGL type
-# for EMSCRIPTEN is FIXED: Single thread & Aux Buffer
+# To build example in Linux/MacOS/Windows (with MinGW) uses follow command:
 #
-#   OpenGL 4.5 - Zero Driver Overhead
+# cmake -DBuildTarget:String=<BuildVer> -G <MakeTool> -B<FolderToBuild>
+#   where:
+#       <BuildVer> must be one of follow strings:
+#           OpenGL_45
+#           OpenGL_41
+#           OpenGL_ES
+#       <MakeTool> is your preferred generator like "Unix Makefiles" or "Ninja"
+#       <FolderToBuild> is the folder where will be generated Makefile, move in it and run your generator
+#       - Default build is "Release" but it can be changed via CMAKE_BUILD_TYPE definition:
+#           command line: -DCMAKE_BUILD_TYPE:STRING=<Debug|Release|MinSizeRel|RelWithDebInfo>
+#           cmake-gui: from combo associated to CMAKE_BUILD_TYPE var
 #
-# OGL 4.5 Aux Thread and mappedBuffer on GPU (less GPU memory)
-# set(OGL45_THREAD_MAPMEM "-DGLAPP_REQUIRE_OGL45 -DUSE_THREAD_TO_FILL -DUSE_MAPPED_BUFFER")
-# OGL 4.5 Aux Thread and Aux buffer (fastest)
-# set(OGL45_THREAD "-DGLAPP_REQUIRE_OGL45 -DUSE_THREAD_TO_FILL")
-# OGL 4.5 Single thread, Aux buffer
-# set(OGL45_BUFFER "-DGLAPP_REQUIRE_OGL45")
+# Example:
+#   to build example compliant to OpenGL 4.5, with "make" utility, in "./build" folder, type:
 #
-#   OpenGL 4.1 - Olden GPU and MacOS X
+#       > cmake -DBuildTarget:String=OpenGL_45 -G Unix\ Makefiles -B./build
+#       > cd build
+#       > make
 #
-# OGL 4.1 Aux Thread and Aux buffer  (fastest on openGL 4.1)
-# set(OGL41_THREAD "-DUSE_THREAD_TO_FILL")
-# OGL 4.1 Single thread, Aux buffer
-# set(OGL41_BUFFER "")
+#
+#
+#
+# To build example with EMSCRIPTEN uses follow command:
+# cmake cmake -DCMAKE_TOOLCHAIN_FILE:STRING=<EMSDK_PATH>/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DBuildTarget:String=<BuildVer> -G "Unix Makefiles"|"ninja" -B<FolderToBuild>
+#   where:
+#       <EMSDK_PATH> is where was installed EMSCRIPTEN: you need to have it in EMSDK environment variable
+#       <BuildVer> must be one of follow strings:
+#           WebGL
+#           WebGL_LowRes
+#       <MakeTool> is your preferred generator like "Unix Makefiles" or "ninja"
+#           Windows users need to use MinGW-make utility (by EMSCRIPTEN specification): ninja or othe can not work.
+#       <FolderToBuild> is the folder where will be generated Makefile, move in it and run your generator
+#       - Default build is "MinSizeRel" but it can be changed via CMAKE_BUILD_TYPE definition:
+#           command line: -DCMAKE_BUILD_TYPE:STRING=<Debug|Release|MinSizeRel|RelWithDebInfo>
+#           cmake-gui: from combo associated to CMAKE_BUILD_TYPE var
+#
 
 
 #set(GLAPP_DISABLE_DLA "-DGLAPP_DISABLE_DLA")
