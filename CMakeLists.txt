@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
-SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
+cmake_minimum_required(VERSION 3.15)
+# SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
 ###########################################################
 #
 # *** CHANGES NOTE ***
@@ -15,7 +15,6 @@ SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
 # set(OGL45_THREAD "-DGLAPP_REQUIRE_OGL45 -DUSE_THREAD_TO_FILL")
 # OGL 4.5 Single thread, Aux buffer
 # set(OGL45_BUFFER "-DGLAPP_REQUIRE_OGL45")
-set(OGL45 "-DGLAPP_REQUIRE_OGL45")
 #
 #   OpenGL 4.1 - Olden GPU and MacOS X
 #
@@ -23,28 +22,69 @@ set(OGL45 "-DGLAPP_REQUIRE_OGL45")
 # set(OGL41_THREAD "-DUSE_THREAD_TO_FILL")
 # OGL 4.1 Single thread, Aux buffer
 # set(OGL41_BUFFER "")
-set(OGL41 "")
 
-set(BASE_DEFINES "-DGLAPP_USE_IMGUI -DGLM_ENABLE_EXPERIMENTAL")
 
 #set(GLAPP_DISABLE_DLA "-DGLAPP_DISABLE_DLA")
+
+set(OGL_45      "OpenGL_45")
+set(OGL_41      "OpenGL_41")
+set(OGL_ES      "OpenGL_ES")
+set(WGL_FULL    "WebGL")
+
+set(BuildTarget ${OGL_45} CACHE STRING "Select the target to build:\n    glChAoS.P compliant with OpenGL 4.5/4.1/ES 3.x\n    wglChAoS.P compliant with WebGL 2.0\n    \"LowRes\" stands for GPU with LowResources (mem/cores\)")
+set(BuildTargetValues "${OGL_45};${OGL_41};${OGL_ES};${WGL_FULL};" CACHE INTERNAL "Select one")
+set_property(CACHE BuildTarget PROPERTY STRINGS ${BuildTargetValues} )
+
+set(OGL45 "-DGLAPP_REQUIRE_OGL45") #-DGLAPP_USES_SEPARABLE
+
+set(OGL41 "")
+set(OGLES "-DGLAPP_USES_ES3 -DIMGUI_IMPL_OPENGL_ES3")
+
+set(BASE_DEFINES "-DGLAPP_USE_IMGUI -DVGM_USES_TEMPLATE")
+
+
+if(${BuildTarget} STREQUAL ${OGL_45})
+    set(OGL_VER_USED ${OGL45})
+    message(STATUS "selected ${BuildTarget} ...")
+    elseif(${BuildTarget} STREQUAL ${OGL_41})
+        set(OGL_VER_USED ${OGL41})
+        message(STATUS "selected ${BuildTarget} ...")
+    elseif(${BuildTarget} STREQUAL ${OGL_ES})
+            set(OGL_VER_USED ${OGLES})
+            message(STATUS "selected ${BuildTarget} ...")
+    elseif(${BuildTarget} STREQUAL ${WGL_FULL})
+                set(BUILD_WebGL TRUE BOOL)
+                set(defaultBuildType "MinSizeRel")
+                message(STATUS "selected ${BuildTarget} ...")
+endif()
+
+#change default build type from cmake-gui
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "'CMAKE_BUILD_TYPE' not specified, now is set to: '${defaultBuildType}' ...")
+  set(CMAKE_BUILD_TYPE "${defaultBuildType}" CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;MinSizeRel;RelWithDebInfo")
+endif()
+
 
 set(SRC "${CMAKE_SOURCE_DIR}/src")
 
     set(SOURCE_FILES
-        ${SRC}/libs/ImGui/imconfig.h
-        ${SRC}/libs/ImGui/imgui.cpp
-        ${SRC}/libs/ImGui/imgui_widgets.cpp
-        ${SRC}/libs/ImGui/imgui.h
-        ${SRC}/libs/ImGui/imgui_draw.cpp
-        ${SRC}/libs/ImGui/imgui_impl_glfw.cpp
-        ${SRC}/libs/ImGui/imgui_impl_glfw.h
-        ${SRC}/libs/ImGui/imgui_impl_opengl3.cpp
-        ${SRC}/libs/ImGui/imgui_impl_opengl3.h
-        ${SRC}/libs/ImGui/imgui_internal.h
-        ${SRC}/libs/ImGui/imstb_rectpack.h
-        ${SRC}/libs/ImGui/imstb_textedit.h
-        ${SRC}/libs/ImGui/imstb_truetype.h
+        ${SRC}/libs/imgui/imconfig.h
+        ${SRC}/libs/imgui/imgui.cpp
+        ${SRC}/libs/imgui/imgui_widgets.cpp
+        ${SRC}/libs/imgui/imgui.h
+        ${SRC}/libs/imgui/imgui_draw.cpp
+        ${SRC}/libs/imgui/imgui_impl_glfw.cpp
+        ${SRC}/libs/imgui/imgui_impl_glfw.h
+        ${SRC}/libs/imgui/imgui_impl_opengl3.cpp
+        ${SRC}/libs/imgui/imgui_tables.cpp
+        ${SRC}/libs/imgui/imgui_impl_opengl3_loader.h
+        ${SRC}/libs/imgui/imgui_impl_opengl3.h
+        ${SRC}/libs/imgui/imgui_impl_opengl3.h
+        ${SRC}/libs/imgui/imgui_internal.h
+        ${SRC}/libs/imgui/imstb_rectpack.h
+        ${SRC}/libs/imgui/imstb_textedit.h
+        ${SRC}/libs/imgui/imstb_truetype.h
         ${SRC}/libs/lodePNG/lodepng.cpp
         ${SRC}/libs/lodePNG/lodepng.h
         ${SRC}/tools/glslProgramObject.cpp
@@ -62,7 +102,7 @@ set(SRC "${CMAKE_SOURCE_DIR}/src")
 ###########################################################
 #   EMSCRIPTEN setting
 ###########################################################
-if (BUILD_wglAPP)
+if(BUILD_WebGL)
     project(wglApp)
     set(OGL_EMITTER_TYPE ${OGL41})
     
@@ -146,28 +186,50 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 #   PC setting
 ###########################################################
 else()
+    set(APP_NAME "SmartDeNoise")
     if(APPLE)
-        project(glApp_OSX)
+        project(gl${APP_NAME}_OSX)
     else()
         if(WIN32)
-            project(glApp)
+            project(gl${APP_NAME})
         else()
-            project(glApp_Linux)
+            project(gl${APP_NAME}_Linux)
         endif()
     endif()
 
     set(CMAKE_CXX_STANDARD 14)
-    find_package(OpenGL)
-    
 
+add_executable(${PROJECT_NAME}
+        ${SRC}/libs/glad/glad.cpp
+        ${SRC}/libs/glad/glad.h
+        ${SOURCE_FILES})
+
+# GLFW package
+#
+    find_package(glfw3)
+    if(glfw3_FOUND)
+        set(LIB_GLFW "glfw")
+    else()
+        message (FATAL_ERROR "GLFW not found... REQUIRED!!!!")
+    endif()
+
+# OpenGL
+#
+    find_package(OpenGL)
 if(OPENGL_FOUND)
     message(STATUS "OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
     message(STATUS "OPENGL_LIBRARY: ${OPENGL_LIBRARY}")
-
-    include_directories(${OPENGL_INCLUDE_DIRS})
+    #include_directories(${OPENGL_INCLUDE_DIRS}) # no more necessary: modern OGL uses loaders ==> glad
 else ()
     message (FATAL_ERROR "OPENGL not found... REQUIRED!!!!")
-endif(OPENGL_FOUND)
+endif()
+
+if(EXISTS $ENV{RAMDISK}) #my RAMDISK env var
+    message("RamDisk...")
+    set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY $ENV{RAMDISK}/gl${APP_NAME})
+else()
+    set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
+endif()
 
 # set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/builds")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
@@ -188,23 +250,19 @@ include_directories(${SRC}/libs)
 
 #uncomment for GLFW installed dir
 
-add_executable(${PROJECT_NAME} 
-        ${SRC}/libs/glad/glad.cpp
-        ${SRC}/libs/glad/glad.h
-        ${SOURCE_FILES})
-
 if(OPENGL_FOUND)
     if(APPLE)
-        set(TARGET_LIBS "-lglfw3 -ldl")
+        set(TARGET_LIBS "-ldl")
     else()
+        add_definitions(${OGL_VER_USED})
         if(WIN32)
-        set(TARGET_LIBS "-lglfw3 -ldl")
+        set(TARGET_LIBS "-ldl")
         else()    
-        set(TARGET_LIBS "-lglfw -ldl -lX11")
+        set(TARGET_LIBS "-ldl -lX11")
         endif(WIN32)
     endif(APPLE)
 
-    target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARY} ${TARGET_LIBS})
+    target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARY} ${TARGET_LIBS} ${LIB_GLFW})
 endif(OPENGL_FOUND)
 
 endif() 
