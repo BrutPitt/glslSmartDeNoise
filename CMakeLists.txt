@@ -44,6 +44,8 @@ cmake_minimum_required(VERSION 3.15)
 
 #set(GLAPP_DISABLE_DLA "-DGLAPP_DISABLE_DLA")
 
+#set(ENABLE_TEST "-DGLAPP_TEST")
+
 set(OGL_45      "OpenGL_45")
 set(OGL_41      "OpenGL_41")
 set(OGL_ES      "OpenGL_ES")
@@ -53,7 +55,7 @@ set(BuildTarget ${OGL_45} CACHE STRING "Select the target to build:\n    glChAoS
 set(BuildTargetValues "${OGL_45};${OGL_41};${OGL_ES};${WGL_FULL};" CACHE INTERNAL "Select one")
 set_property(CACHE BuildTarget PROPERTY STRINGS ${BuildTargetValues} )
 
-set(OGL45 "-DGLAPP_REQUIRE_OGL45") #-DGLAPP_USES_SEPARABLE
+set(OGL45 "-DGLAPP_REQUIRE_OGL45 -DGLAPP_USES_SEPARABLE") #-DGLAPP_USES_SEPARABLE
 
 set(OGL41 "")
 set(OGLES "-DGLAPP_USES_ES3 -DIMGUI_IMPL_OPENGL_ES3")
@@ -62,7 +64,7 @@ set(BASE_DEFINES "-DGLAPP_USE_IMGUI -DVGM_USES_TEMPLATE")
 
 
 if(${BuildTarget} STREQUAL ${OGL_45})
-    set(OGL_VER_USED ${OGL45})
+    set(OGL_VER_USED ${OGL45} ${ENABLE_TEST})
     message(STATUS "selected ${BuildTarget} ...")
     elseif(${BuildTarget} STREQUAL ${OGL_41})
         set(OGL_VER_USED ${OGL41})
@@ -109,20 +111,31 @@ set(SRC "${CMAKE_SOURCE_DIR}/src")
         ${SRC}/tools/glslProgramObject.h
         ${SRC}/tools/glslShaderObject.cpp
         ${SRC}/tools/glslShaderObject.h
+        ${SRC}/tools/mmFBO.cpp
+        ${SRC}/tools/mmFBO.h
         ${SRC}/ui/uiMainDlg.cpp
         ${SRC}/ui/uiMainDlg.h
         ${SRC}/ui/uiSettings.cpp
         ${SRC}/glApp.cpp
-        ${SRC}/glApp.h
+        ${SRC}/glApp.h)
+
+
+if(DEFINED ENABLE_TEST)
+        set(SOURCE_FILES ${SOURCE_FILES}
+        ${SRC}/glWindow_test.cpp
+        ${SRC}/glWindow_test.h)
+else()
+        set(SOURCE_FILES ${SOURCE_FILES}
         ${SRC}/glWindow.cpp
         ${SRC}/glWindow.h)
+endif()
 
 ###########################################################
 #   EMSCRIPTEN setting
 ###########################################################
 if(BUILD_WebGL)
     project(wglApp)
-    set(OGL_EMITTER_TYPE ${OGL41})
+    set(OGL_EMITTER_TYPE "${OGL41} -DGLAPP_WEBGL")
     
     set(CMAKE_CXX_STANDARD 14)
     find_package(OpenGL)
@@ -138,15 +151,9 @@ if(BUILD_WebGL)
 set(CMAKE_EXECUTABLE_SUFFIX ".html")
 
 # relative emscripten output files (EMSOUT_PATH for my RAMDISK, if defined)
-    if(EXISTS $ENV{EMSOUT_PATH})
-        set(EMSOUT "$ENV{EMSOUT_PATH}/emsOut")
-    else()
-        set(EMSOUT "${CMAKE_SOURCE_DIR}/emsOut")
-    endif()
 
-    file(MAKE_DIRECTORY ${EMSOUT})
-    file(MAKE_DIRECTORY ${EMSOUT}/${CMAKE_BUILD_TYPE})
-    set(EMSOUT ${EMSOUT}/${CMAKE_BUILD_TYPE})
+    #file(MAKE_DIRECTORY ${EMSOUT}/${CMAKE_BUILD_TYPE})
+    #set(EMSOUT ${EMSOUT}/${CMAKE_BUILD_TYPE})
 
 # emcc compiler options
     set(M_EMCC_FLAGS "-DGLAPP_NO_OGL_DSA -DGLFW_INCLUDE_ES3")
@@ -155,12 +162,12 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 # BUILD TYPE: [Debug|RelWithDebInfo|Release|MinSizeRel]    
     if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
         set(M_EMCC_BINARYEN "-s WASM=0 -s DEMANGLE_SUPPORT=1 ")
-        set(M_EMCC_SHELL_FILE "--shell-file \"${CMAKE_SOURCE_DIR}/shell_minimal.html\"")
+        set(M_EMCC_SHELL_FILE "--shell-file \"${CMAKE_SOURCE_DIR}/mVeryMinimal.html\"")
     else()
         #  -s BINARYEN_METHOD='native-wasm,asmjs' 'interpret-asm2wasm' -s BINARYEN_ASYNC_COMPILATION=0
         if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
             set(M_EMCC_BINARYEN "-s WASM=1")
-            set(M_EMCC_SHELL_FILE "--shell-file \"${CMAKE_SOURCE_DIR}/shell_minimal.html\"")
+            set(M_EMCC_SHELL_FILE "--shell-file \"${CMAKE_SOURCE_DIR}/mVeryMinimal.html\"")
         else()
             if(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
                 # one file no memory option: -s SINGLE_FILE=1 --memory-init-file 0
@@ -181,8 +188,10 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../ChaoticAttractors@ChaoticAttractors/\"\
 
     set(M_EMCC_EMBED_FILES "--preload-file \"${CMAKE_SOURCE_DIR}/Shaders@Shaders/\"\
-     --preload-file \"${CMAKE_SOURCE_DIR}/image0.png@./\"")
-     
+                            --preload-file \"${CMAKE_SOURCE_DIR}/image0.png@./\"\
+                            --preload-file \"${CMAKE_SOURCE_DIR}/image1.png@./\"\
+                            --preload-file \"${CMAKE_SOURCE_DIR}/image2.png@./\"")
+
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../Fonts/Cousine-Regular.ttf@Fonts/\"\
 #     --embed-file \"${CMAKE_SOURCE_DIR}/../Fonts/fontawesome-webfont.ttf@Fonts/\"\
 
@@ -191,13 +200,27 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(M_EMCC_OGL_OPTIONS "-s USE_WEBGL2=1 -s USE_GLFW=3 -s LEGACY_GL_EMULATION=0 -s OFFSCREENCANVAS_SUPPORT=1 ")
 
 # merge all EMCC_OPTIONS -s BINARYEN_TRAP_MODE=clamp 
-    set(M_EMCC_OPTIONS "-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN_TRAP_MODE=clamp -s PRECISE_F32=1 ${M_EMCC_SHELL_FILE} ${M_EMCC_OGL_OPTIONS} ${M_EMCC_BINARYEN} ${M_EMCC_EMBED_FILES}")
+    set(M_EMCC_OPTIONS "-s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s ALLOW_MEMORY_GROWTH=1 -s PRECISE_F32=1 ${M_EMCC_SHELL_FILE} ${M_EMCC_OGL_OPTIONS} ${M_EMCC_BINARYEN} ${M_EMCC_EMBED_FILES}")
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EMSOUT}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${M_GLOBAL_FLAGS} ${OGL_EMITTER_TYPE} ${M_EMCC_FLAGS} ${M_EMCC_OPTIONS} ${GLAPP_DISABLE_DLA} -Wno-parentheses -Wno-format-security -Wno-logical-op-parentheses -Wno-unused-value -Wdelete-non-virtual-dtor")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${M_GLOBAL_FLAGS} ${OGL_EMITTER_TYPE} ${M_EMCC_FLAGS} ${M_EMCC_OPTIONS} ${GLAPP_DISABLE_DLA} -Wno-parentheses -Wno-format-security -Wno-logical-op-parentheses -Wno-unused-value -Wdelete-non-virtual-dtor  -Wno-unused-command-line-argument")
 
-    add_executable(${PROJECT_NAME} 
-                    ${SOURCE_FILES})
+    if(EXISTS $ENV{EMSOUT_PATH})
+        set(EMSOUT "$ENV{EMSOUT_PATH}/WebGL")
+    else()
+        set(EMSOUT "${CMAKE_SOURCE_DIR}/WebGL")
+    endif()
+
+    if(EXISTS $ENV{RAMDISK}) #my RAMDISK env
+        set(BUILD_DIR $ENV{RAMDISK}/emsOut/${CMAKE_BUILD_TYPE})
+    else ()
+        set(BUILD_DIR ${EMSOUT}/${CMAKE_BUILD_TYPE})
+    endif()
+
+    add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
 
 ###########################################################
@@ -259,7 +282,9 @@ else()
 endif(APPLE)
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security ${OGL_EMITTER_TYPE} ${COMMON_DEFINES} ${GLAPP_DISABLE_DLA} -std=c++14 -fpermissive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format-security -std=c++14 -fpermissive")
+
+add_definitions(${OGL_VER_USED} ${OGL_EMITTER_TYPE} ${COMMON_DEFINES} ${GLAPP_DISABLE_DLA})
 
 include_directories(${SRC})
 include_directories(${SRC}/tools)
@@ -272,7 +297,6 @@ if(OPENGL_FOUND)
     if(APPLE)
         set(TARGET_LIBS "-ldl")
     else()
-        add_definitions(${OGL_VER_USED})
         if(WIN32)
         set(TARGET_LIBS "-ldl")
         else()    
