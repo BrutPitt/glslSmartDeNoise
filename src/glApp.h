@@ -112,25 +112,25 @@ public:
     glWindow *getEngineWnd() { return glEngineWnd; }
     void setGLFWWnd(GLFWwindow* wnd) { mainGLFWwnd = wnd; }
 
-	int getXPosition() const { return(xPosition); }
+    int getXPosition() const { return(xPosition); }
     int getYPosition() const { return(yPosition); }
-	int GetWidth()     const { return(width);     }
-	int GetHeight()    const { return(height);    }
+    int GetWidth()     const { return(width);     }
+    int GetHeight()    const { return(height);    }
     void SetWidth(int v)  { width  = v; }
     void SetHeight(int v) { height = v; }
-	const char* getWindowTitle() const { return(windowTitle.c_str()); }
+    const char* getWindowTitle() const { return(windowTitle.c_str()); }
 
 protected:
 
-		// The Position of the window
-		int xPosition, yPosition;
-		int width = RES_X, height = RES_Y;
-		/** The title of the window */
+        // The Position of the window
+        int xPosition, yPosition;
+        int width = RES_X, height = RES_Y;
+        /** The title of the window */
 
         bool exitFullScreen;
 
-		// The title of the window
-		std::string windowTitle;
+        // The title of the window
+        std::string windowTitle;
         std::string glslDefines;
     
     

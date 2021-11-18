@@ -18,12 +18,12 @@
 #include "glWindow.h"
 
 
-void textureBaseClass::genTex()
+void textureBaseClass::genTex(int idx)
 {
 
     if(generated) {
 #if !defined(GLCHAOSP_LIGHTVER)
-        glDeleteTextures(1,&texID);
+        glDeleteTextures(1,&texID[idx]);
         CHECK_GL_ERROR();
 #else
         return;
@@ -31,23 +31,23 @@ void textureBaseClass::genTex()
     }
 
 #ifdef GLAPP_REQUIRE_OGL45
-    glCreateTextures(GL_TEXTURE_2D, 1, &texID);
+    glCreateTextures(GL_TEXTURE_2D, 1, &texID[idx]);
 #else
-    glGenTextures(1, &texID);   // Generate OpenGL texture IDs
+    glGenTextures(1, &texID[idx]);   // Generate OpenGL texture IDs
 #endif
 
     generated = true;
 }
 
-void textureBaseClass::assignAttribs(GLint filterMin, GLint filterMag, GLint wrap) 
+void textureBaseClass::assignAttribs(int idx, GLint filterMin, GLint filterMag, GLint wrap)
 {
 #ifdef GLAPP_REQUIRE_OGL45
-    glTextureParameteri(texID, GL_TEXTURE_MAG_FILTER, filterMag);
-    glTextureParameteri(texID, GL_TEXTURE_MIN_FILTER, filterMin);
-    glTextureParameteri(texID, GL_TEXTURE_WRAP_S, wrap );
-    glTextureParameteri(texID, GL_TEXTURE_WRAP_T, wrap );
+    glTextureParameteri(texID[idx], GL_TEXTURE_MAG_FILTER, filterMag);
+    glTextureParameteri(texID[idx], GL_TEXTURE_MIN_FILTER, filterMin);
+    glTextureParameteri(texID[idx], GL_TEXTURE_WRAP_S, wrap );
+    glTextureParameteri(texID[idx], GL_TEXTURE_WRAP_T, wrap );
 #else
-    glBindTexture(GL_TEXTURE_2D, texID);			// Bind Our Texture
+    glBindTexture(GL_TEXTURE_2D, texID[idx]);            // Bind Our Texture
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap );
@@ -55,20 +55,19 @@ void textureBaseClass::assignAttribs(GLint filterMin, GLint filterMag, GLint wra
 #endif
 }
 
-void textureBaseClass::buildTex(void *buffer, const int x, const int y)
+void textureBaseClass::buildTex(int idx, void *buffer, const int x, const int y)
 {
-    genTex();
+    genTex(idx);
     const GLint texInternal = GL_RGBA;
 
-    glActiveTexture(GL_TEXTURE0 + texID);
-    glBindTexture(GL_TEXTURE_2D, texID);			// Bind Our Texture
+    glActiveTexture(GL_TEXTURE0 + texID[idx]);
+    glBindTexture(GL_TEXTURE_2D, texID[idx]);            // Bind Our Texture
     glTexImage2D(GL_TEXTURE_2D, 0, texInternal, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
-    assignAttribs(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    assignAttribs(idx, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     CHECK_GL_ERROR();
 
 }
-
 
 void deNoiseClass::render()
 {
@@ -79,21 +78,23 @@ void deNoiseClass::render()
 
     glUseProgram(program);
 
-    glUniform1f(locSigma, sigma); 
-    glUniform1f(locThreshold, threshold);
-    glUniform1f(locSlider, slider); 
-    glUniform1f(locKSigma, kSigma); 
-    glUniform2f(locWSize,theApp->GetWidth(),theApp->GetHeight());
+    int idx = theWnd->getDeNoise().getTexture().whichImg;
 
-#ifdef __EMSCRIPTEN__
-    // pass uniform variables
-#else
+    glUniform1f(locSigma, aSigma[idx]);
+    glUniform1f(locThreshold, aThreshold[idx]);
+    glUniform1f(locSlider, slider); 
+    glUniform1f(locKSigma, aKSigma[idx]);
+    glUniform1f(locInvGamma, 1.0/gamma);
+    glUniform1i(locUseTest, useTest);
+    glUniform1i(locWhichTest, whichTest);
+    glUniform2f(locWSize,theApp->GetWidth(),theApp->GetHeight());
+    
 #ifdef GLAPP_REQUIRE_OGL45
     glBindTextureUnit(1, theWnd->getDeNoise().getTexture().getTexID());
 #else
     glActiveTexture(GL_TEXTURE0+theWnd->getDeNoise().getTexture().getTexID());
     glBindTexture(GL_TEXTURE_2D, theWnd->getDeNoise().getTexture().getTexID());
-#endif
+    glUniform1i(locImgData, theWnd->getDeNoise().getTexture().getTexID());
 #endif
     //updateBufferData();
     // Draw
@@ -102,61 +103,39 @@ void deNoiseClass::render()
 
 }
 
+void setView() {}
+void setViewOrtho() {}
+glWindow::glWindow() {}
+glWindow::~glWindow() {}
 
-
-
-void setView()
-{
-
-   
-}
-
-
-void setViewOrtho()
-{
-
-
-}
-
-
-glWindow::glWindow()
-{
-    
-
-}
-
-
-glWindow::~glWindow()
-{
-
-}
-
-#define IMG_IDX 1
+#define IMG_IDX 2
 
 //
 /////////////////////////////////////////////////
 void glWindow::onInit()
 {
     std::vector<unsigned char> image;
-    unsigned x,y;
+    unsigned x = 1280,y = 800;
 
     deNoise = new deNoiseClass;
 
-    getDeNoise().sigma = getDeNoise().aSigma[IMG_IDX];
-    getDeNoise().threshold = getDeNoise().aThreshold[IMG_IDX];
-    getDeNoise().kSigma = getDeNoise().aKSigma[IMG_IDX];
+    //getDeNoise().sigma = getDeNoise().aSigma[IMG_IDX];
+    //getDeNoise().threshold = getDeNoise().aThreshold[IMG_IDX];
+    //getDeNoise().kSigma = getDeNoise().aKSigma[IMG_IDX];
 
     char str[32];
-    sprintf(str,"image%d.png",IMG_IDX);
-    lodepng::decode(image, x, y, str);
-    ivec2 size(x,y);
-
+    for(int i=0; i<NUM_TEXTURES; i++) {
+        sprintf(str,"image%d.png",i);
+        lodepng::decode(image, x, y, str);
+        //ivec2 size(x,y);
 
     //glViewport(0, 0, theApp->GetWidth(), theApp->GetWidth());
+        getDeNoise().getTexture().buildTex(i, image.data(), x, y);
+        image.clear();
+    }
+    glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
     theApp->SetWidth(x); theApp->SetHeight(y);
     glViewport(0, 0, x, y);
-    glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
-    getDeNoise().getTexture().buildTex(image.data(), x, y);
     getDeNoise().initShader();
 }
 

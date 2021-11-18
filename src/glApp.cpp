@@ -16,8 +16,11 @@
 #include <vector>
 
 #include "glApp.h"
-#include "glWindow.h"
-
+#ifdef GLAPP_TEST
+    #include "glWindow_test.h"
+#else
+    #include "glWindow.h"
+#endif
 
 #ifndef __EMSCRIPTEN__
     GLFWmonitor* getCurrentMonitor(GLFWwindow *window);
@@ -338,7 +341,6 @@ void mainGLApp::glfwInit()
     #else
         gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);    //get OpenGL extensions
     #endif
-#endif
 
 #ifndef NDEBUG
 /*
@@ -355,6 +357,9 @@ void mainGLApp::glfwInit()
     else
         cout << "glDebugMessageCallback not available: need OpenGL ES 3.2+ or OpenGL 4.3+" << endl;
 #endif
+
+#endif
+
 
 
     glfwSetKeyCallback(getGLFWWnd(), glfwKeyCallback);

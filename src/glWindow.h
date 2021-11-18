@@ -36,6 +36,8 @@ template<> void IntDataHelper<8>()
 inline void IntData() { IntDataHelper<sizeof(size_t)>(); }
 */
 
+#define NUM_TEXTURES 3
+
 #include <cstdint>
 #if INTPTR_MAX == INT32_MAX 
     //APP compiling 32bit    
@@ -44,6 +46,8 @@ inline void IntData() { IntDataHelper<sizeof(size_t)>(); }
 #else
     #error "Environment not 32 or 64-bit."
 #endif
+
+enum wTest { sRGB, luminance, linearLuminance, HSL };
 
 class vaoClass {
 public:
@@ -105,17 +109,18 @@ public:
     
     textureBaseClass() { }
 
-    GLuint getTexID()   { return texID;   }
+    GLuint getTexID()   { return texID[whichImg];   }
     GLuint getTexSize() { return texSize; }
-    void buildTex(void* buffer, const int x, const int y);
+    void buildTex(int idx, void* buffer, const int x, const int y);
 
-    GLuint texID  ;
+    GLuint texID[NUM_TEXTURES]  ;
     GLuint texSize =  0;
+    GLint whichImg = 1;
 
 protected:
     bool generated = false;
-    void genTex();
-    void assignAttribs(GLint filterMin=GL_LINEAR, GLint filterMag=GL_LINEAR, GLint wrap=GL_CLAMP_TO_EDGE);
+    void genTex(int idx);
+    void assignAttribs(int idx, GLint filterMin=GL_LINEAR, GLint filterMag=GL_LINEAR, GLint wrap=GL_CLAMP_TO_EDGE);
 
 };
 
@@ -129,23 +134,26 @@ public:
     {
         useVertex(); useFragment();
 
-	    getVertex  ()->Load(USE_GLSL_VERSION USE_GLSL_PRECISION, 1, GLAPP_SHADERS "vert.glsl");
-	    getFragment()->Load(USE_GLSL_VERSION USE_GLSL_PRECISION, 1, GLAPP_SHADERS "frag.glsl");
-	    // The vertex and fragment are added to the program object
+        getVertex  ()->Load(USE_GLSL_VERSION USE_GLSL_PRECISION, 1, GLAPP_SHADERS "vert.glsl");
+        getFragment()->Load(USE_GLSL_VERSION USE_GLSL_PRECISION, 2, GLAPP_SHADERS "colorSpaces.glsl", GLAPP_SHADERS "frag.glsl");
+        // The vertex and fragment are added to the program object
         addVertex();
         addFragment();
-
-	    link();
+    
+        link();
 
         locSigma = glGetUniformLocation(program, "uSigma");
         locThreshold = glGetUniformLocation(program, "uThreshold");
         locWSize = glGetUniformLocation(program, "wSize");
         locSlider = glGetUniformLocation(program, "uSlider");
         locKSigma = glGetUniformLocation(program, "uKSigma");
+        locInvGamma = glGetUniformLocation(program, "invGamma");
+        locUseTest = glGetUniformLocation(program, "useTest");
+        locWhichTest = glGetUniformLocation(program, "whichTest");
 
 #if !defined(GLAPP_REQUIRE_OGL45)
         bindShaderProg();
-        glUniform1i(glGetUniformLocation(program,"imageData"), getTexture().getTexID());
+        locImgData = glGetUniformLocation(program,"imageData");
 
 #endif
 
@@ -171,18 +179,23 @@ public:
 
     uDataStruct &getUData() { return uData; }
 
-    GLfloat sigma = 11.0f, threshold = .180f, slider = 0.f; //running
+    //GLfloat sigma = 11.0f, threshold = .180f,  //running
     // GLfloat sigma = 7.0f, threshold = .180f, slider = 0.f; //running
-    GLfloat kSigma = 2.f;
+    //GLfloat kSigma = 2.f;
 
-    GLfloat aSigma[3] = {9.f, 7.f, 7.f};
-    GLfloat aThreshold[3] = {.180f, .195f, .180f};
-    GLfloat aKSigma[3] = {3.f, 3.f, 2.f};
+    GLfloat slider = 0.f;
+
+    GLfloat aSigma[NUM_TEXTURES] = {9.f, 7.f, 7.f};
+    GLfloat aThreshold[NUM_TEXTURES] = {.180f, .195f, .180f};
+    GLfloat aKSigma[NUM_TEXTURES] = {3.f, 3.f, 2.f};
+    GLfloat gamma = 2.2;
+    bool useTest = false;
+    GLint whichTest = 0;
 
 private:
     textureBaseClass texture;
 
-    GLuint locSigma,locThreshold, locWSize, locSlider, locKSigma;
+    GLuint locSigma,locThreshold, locWSize, locSlider, locKSigma, locInvGamma, locUseTest, locWhichTest, locImgData;
     vaoClass vao;
 
 };
@@ -205,34 +218,34 @@ class glWindow /*: public glApp*/
     mainGLApp *GetFrame()  { return theApp; }
     mainGLApp *GetCanvas() { return theApp; }   
 
-public:		
+public:        
 
     glWindow();
-	virtual ~glWindow();
+    virtual ~glWindow();
 
 
     // Called when Window is created
-	virtual void onInit();
+    virtual void onInit();
     // Called when Window is closed.
-	virtual void onExit();
+    virtual void onExit();
 
-	// The onIdle and onDisplay methods should also be overloaded.
-	// Within the onIdle method put the logic of the application.
-	// The onDisplay method is for any drawing code.
-	virtual void onIdle();
-	virtual void onRender();
-	virtual void onReshape(GLint w, GLint h);
+    // The onIdle and onDisplay methods should also be overloaded.
+    // Within the onIdle method put the logic of the application.
+    // The onDisplay method is for any drawing code.
+    virtual void onIdle();
+    virtual void onRender();
+    virtual void onReshape(GLint w, GLint h);
 
-	virtual void onMouseButton(int button, int upOrDown, int x, int y);
-	virtual void onMouseWheel(int wheel, int direction, int x, int y);
-	virtual void onMotion(int x, int y);
-	virtual void onPassiveMotion(int x, int y);
+    virtual void onMouseButton(int button, int upOrDown, int x, int y);
+    virtual void onMouseWheel(int wheel, int direction, int x, int y);
+    virtual void onMotion(int x, int y);
+    virtual void onPassiveMotion(int x, int y);
 
-	// The onKeyDown method handles keyboard input that are standard ASCII keys
-	virtual void onKeyDown(unsigned char key, int x, int y);
+    // The onKeyDown method handles keyboard input that are standard ASCII keys
+    virtual void onKeyDown(unsigned char key, int x, int y);
     virtual void onKeyUp(unsigned char key, int x, int y);
-	virtual void onSpecialKeyUp(int key, int x, int y);
-	virtual void onSpecialKeyDown(int key, int x, int y);
+    virtual void onSpecialKeyUp(int key, int x, int y);
+    virtual void onSpecialKeyDown(int key, int x, int y);
 
 
     int GetWidth()  { return GetCanvas()->GetWidth();  }
