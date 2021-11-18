@@ -6,15 +6,32 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 - K factor sigma coefficient
 - Edge sharpening threshold
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html) |
+
+**result depends on settings and input signal*
+
+## Enhancements
+
+Some enhancements can be obtained using "other color spaces" on noise evaluation (not on final image), to emphasize pixel differences/threshold.
+- **sRGB** with gamma correction.
+- **Luminance** 
+- **HSL** using **HL** components and leaving out **S** (saturation)
+- ... other possibles (*write me*)
+  
+All this can lead to better results, under certain circumstances, but at the expense of performance, so these are not inserted in the main filter: use live WebGL demo to try they.
+**full source is provided in `example` folder - main filter variants are contained in `Shaders/frag.glsl` file*
+
+| Live WebGL2 demo -> [glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html) |
+| :-----: |
+
+| Tree - Sunset |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot1.jpg)|
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html) |
+| Runner - on the beach |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot2.jpg)|
 
-| Live WebGL2 demo -> [glslSmartDeNoise Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html) |
+| Tree - Daylight |
 | :-----: |
 |[![](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)](https://raw.githubusercontent.com/BrutPitt/glslSmartDeNoise/master/sShot0.jpg)|
 
@@ -22,16 +39,14 @@ Fast glsl spatial **deNoise** filter, with circular gaussian kernel and smart/fl
 ### About live WebGL2 demos
 
 You can run/test **WebGL 2** examples of **glslSmartDeNoise** also from following links:
-- **[Example 1](https://brutpitt.github.io/glslSmartDeNoise/WebGL1/wglApp.html)**
-- **[Example 2](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
-- **[Example 3](https://brutpitt.github.io/glslSmartDeNoise/WebGL0/wglApp.html)**
+- **[glslSmartDeNoise](https://brutpitt.github.io/glslSmartDeNoise/WebGL/wglApp.html)**
 - **[ShaderToy Example - porting to ShaderToy ](https://www.shadertoy.com/view/3dd3Wr)** **no interaction with parameters: need change them in the code*
 
 It works only on browsers with **WebGl 2** and **webAssembly** support (FireFox/Opera/Chrome and Chromium based)
 
 Test if your browser supports WebGL 2, here: [WebGL2 Report](http://webglreport.com/?v=2)
 
-**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a GLOW effect like a "stardust" or "particle-dust" (it's the *"bilinear threshold"* filter in GLOW section)
+**glslSmartDeNoise** is used in **[glChAoS.P](https://github.com/BrutPitt/glChAoS.P)** poroject to produce a  effect like a "stardust" or "particle-dust" (it's the *"bilinear threshold"* filter in GLOW section)
 You can watch a graphical example at **[glChAoS.P *glow threshold* effect](https://www.michelemorrone.eu/glchaosp/glowEffects.html)** link
 
 ## glslSmartDeNoise filter
@@ -179,26 +194,49 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 ### Building Example
 
 The C++ example shown in the screenshot is provided.
-To build it you can use CMake (3.10 or higher) or the Visual Studio solution project (for VS 2017/2019) in Windows.
+To build it you can use CMake (3.15 or higher) or the Visual Studio solution project (for VS 2017/2019) in Windows.
 You need to have installed [**GLFW**](https://www.glfw.org/) (v.3.3 or above) in your compiler search path (LIB/INCLUDE).
 Other tools: [**ImGui**](https://github.com/ocornut/imgui), [**lodePNG**](https://github.com/lvandeve/lodepng) and [**glad**](https://github.com/Dav1dde/glad) are attached, and already included in the project.
 
-To build with CMake use GUI and pay attention to GLFW library name: **glfw3** or **glfw** (in some linux distributions)
+To build example with CMake in Linux / MacOS / Windows uses follow command:
+```cmake
 
-The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher) use GUI (and flag `BUILD_wglAPP` check) or execute the following command:
-
-``` bash
-cmake --target wglApp -DCMAKE_TOOLCHAIN_FILE:STRING=%EMSCRIPTEN%\cmake\Modules\Platform\Emscripten.cmake -DCMAKE_BUILD_TYPE:STRING=%BUILD_TYPE% -DBUILD_wglAPP:BOOL=TRUE -G "MinGW Makefiles" .
+# cmake -DBuildTarget:String=<BuildVer> -G <MakeTool> -B<FolderToBuild>
+#   where:
+#       <BuildVer> must be one of follow strings:
+#           OpenGL_45
+#           OpenGL_41
+#           OpenGL_ES
+#       <MakeTool> is your preferred generator like "Unix Makefiles" or "Ninja"
+#       <FolderToBuild> is the folder where will be generated Makefile, move in it and run your generator
+#       - Default build is "Release" but it can be changed via CMAKE_BUILD_TYPE definition:
+#           command line: -DCMAKE_BUILD_TYPE:STRING=<Debug|Release|MinSizeRel|RelWithDebInfo>
+#           cmake-gui: from combo associated to CMAKE_BUILD_TYPE var
+#
+# Example:
+#   to build example compliant to OpenGL 4.5, with "make" utility, in "./build" folder, type:
+#
+#       > cmake -DBuildTarget:String=OpenGL_45 -G Unix\ Makefiles -B./build
+#       > cd build
+#       > make
+#
 ```
-where:
-- `%EMSCRIPTEN%` is your emscripten installation path (e.g. `C:\emsdk\emscripten\1.38.8`)
-- `%BUILD_TYPE%` is build type: `Debug | Release | RelWithDebInfo | MinSizeRel` 
+
+The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher):
+
+```cmake
+# To build example with EMSCRIPTEN uses follow command:
+# cmake cmake -DCMAKE_TOOLCHAIN_FILE:STRING=<EMSDK_PATH>/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DBuildTarget:String=<BuildVer> -G "Unix Makefiles"|"ninja" -B<FolderToBuild>
+#   where:
+#       <EMSDK_PATH> is where was installed EMSCRIPTEN: you need to have it in EMSDK environment variable
+#       <BuildVer> must be one of follow strings:
+#           WebGL
+#       <MakeTool> is your preferred generator like "Unix Makefiles" or "ninja"
+#           Windows users need to use MinGW-make utility (by EMSCRIPTEN specification): ninja or othe can not work.
+#       <FolderToBuild> is the folder where will be generated Makefile, move in it and run your generator
+#       - Default build is "MinSizeRel" but it can be changed via CMAKE_BUILD_TYPE definition:
+#           command line: -DCMAKE_BUILD_TYPE:STRING=<Debug|Release|MinSizeRel|RelWithDebInfo>
+#           cmake-gui: from combo associated to CMAKE_BUILD_TYPE var
+```
 
 To build the EMSCRIPTEN version, in Windows, with CMake, need to have **mingw32-make.exe** in your computer and search PATH (only the make utility is enough): it is a condition of EMSDK tool to build with CMake in Windows.
-
-
-**For windows users that use vs2017 project solution:**
-The current VisualStudio project solution refers to my environment variable RAMDISK (`R:`), and subsequent VS intrinsic variables to generate binary output:
-`$(RAMDISK)\$(MSBuildProjectDirectoryNoRoot)\$(DefaultPlatformToolset)\$(Platform)\$(Configuration)\` 
-Even without a RAMDISK variable, executable and binary files are outputted in base to the values of these VS variables, starting from root of current drive.
-
