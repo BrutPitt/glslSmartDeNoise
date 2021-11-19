@@ -20,7 +20,12 @@
 
 
 #include "../glApp.h"
-#include "../glWindow.h"
+
+#ifdef GLAPP_TEST
+    #include "../glWindow_test.h"
+#else
+    #include "../glWindow.h"
+#endif
 
 
 #include "uiMainDlg.h"
@@ -44,10 +49,11 @@ void mainImGuiDlgClass::renderImGui()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuiStyle& style = ImGui::GetStyle();
+    float sizeY = theWnd->getDeNoise().useTest ? 12 : 9;
            
 
 
-   ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetFrameHeightWithSpacing()*7), ImGuiCond_FirstUseEver);
+   ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetFrameHeightWithSpacing()*sizeY+5), ImGuiCond_Always);
    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_FirstUseEver);
 
 
@@ -71,6 +77,7 @@ void mainImGuiDlgClass::renderImGui()
                                                                         "2*sigma\0"\
                                                                         "3*sigma\0"));
 */
+            int idx = theWnd->getDeNoise().getTexture().whichImg;
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Radius=");
             ImGui::SameLine();
@@ -78,22 +85,46 @@ void mainImGuiDlgClass::renderImGui()
             const float half = (w-x)/2.f - 6;
             ImGui::PushItemWidth(half);
             //ImGui::DragFloat("##DevStd",&theWnd->getDeNoise().devStd,.05,1.0,3.0,"DevStd: %.3f");
-            ImGui::SliderFloat("##DevStd",&theWnd->getDeNoise().kSigma,0.0,3.0,"DevStd %.2f");
+            ImGui::SliderFloat("##DevStd",&theWnd->getDeNoise().aKSigma[idx],0.0,3.0,"DevStd %.2f");
             ImGui::PopItemWidth();
 
             ImGui::SameLine();
             ImGui::Text("x");
             ImGui::SameLine();
             ImGui::PushItemWidth(half);
-            ImGui::DragFloat("##Sigma",&theWnd->getDeNoise().sigma,.025,0.001f,24.0,"sigma %.3f");
+            ImGui::DragFloat("##Sigma",&theWnd->getDeNoise().aSigma[idx],.025,0.001f,24.0,"sigma %.3f");
             ImGui::PopItemWidth();
 
             ImGui::PushItemWidth(w);
-            ImGui::DragFloat("##Threshold",&theWnd->getDeNoise().threshold,.001,.001f,2.0,"edge threshold %.3f");
+            ImGui::DragFloat("##Threshold",&theWnd->getDeNoise().aThreshold[idx],.001,.001f,2.0,"edge threshold %.3f");
+
 
             ImGui::NewLine();
             ImGui::SliderFloat("##Slide",&theWnd->getDeNoise().slider,-1.0,1.0,"slide %.3f");
             ImGui::PopItemWidth();
+            ImGui::Combo(" Images", &theWnd->getDeNoise().getTexture().whichImg,
+                                         "Tree - daylight\0"\
+                                         "Tree - sunset\0"\
+                                         "Runner - on the beach\0");
+
+            NewLine();
+            ImGui::Checkbox(" Test other spaces...", &theWnd->getDeNoise().useTest);
+
+            if(theWnd->getDeNoise().useTest) {
+                NewLine();
+                ImGui::PushItemWidth(w);
+                ImGui::Combo("##SpaceType", &theWnd->getDeNoise().whichTest,
+                                             "sRGB (gamma correction)\0"\
+                                             "Luminance\0"\
+                                             "linear Luminance\0"\
+                                             "HSL \0");
+                                             
+                if(theWnd->getDeNoise().whichTest == wTest::sRGB) {
+                    ImGui::DragFloat("##gamma",&theWnd->getDeNoise().gamma, .01, 1.0, 15.0, "gamma %.3f");
+//                    ImGui::SameLine();
+                }
+                ImGui::PopItemWidth();
+            }
 
 
 /*
