@@ -1,3 +1,15 @@
+#------------------------------------------------------------------------------
+#  Copyright (c) 2018-2024 Michele Morrone
+#  All rights reserved.
+#
+#  https://michelemorrone.eu - https://brutpitt.com
+#
+#  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+#
+#  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
+#
+#  This software is distributed under the terms of the BSD 2-Clause license
+#------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.15)
 # SET(BUILD_wglAPP FALSE CACHE FALSE TRUE)
 ###########################################################
@@ -241,6 +253,8 @@ else()
     set(CMAKE_CXX_STANDARD 14)
 
 add_executable(${PROJECT_NAME}
+        ${SRC}/libs/tinyFileDialog/tinyfiledialogs.h
+        ${SRC}/libs/tinyFileDialog/tinyfiledialogs.c
         ${SRC}/libs/glad/glad.cpp
         ${SRC}/libs/glad/glad.h
         ${SOURCE_FILES})
