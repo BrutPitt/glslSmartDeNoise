@@ -55,20 +55,18 @@ Below there is the filter source code with parameters description: this is every
 To view its use you can also examine the `Shader\frag.glsl` file *(all other files are only part of the **C++** examples)*
 
 ``` glsl
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+//------------------------------------------------------------------------------
 #define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
 #define INV_PI 0.31830988618379067153776752674503
 
@@ -222,11 +220,11 @@ To build example with CMake in Linux / MacOS / Windows uses follow command:
 #
 ```
 
-The CMake file is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher):
+The `CMakeFile` is able to build also an [**EMSCRIPTEN**](https://kripken.github.io/emscripten-site/index.html) version, obviously you need to have installed EMSCRIPTEN SDK on your computer (1.38.10 or higher):
 
 ```cmake
 # To build example with EMSCRIPTEN uses follow command:
-# cmake cmake -DCMAKE_TOOLCHAIN_FILE:STRING=<EMSDK_PATH>/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DBuildTarget:String=<BuildVer> -G "Unix Makefiles"|"ninja" -B<FolderToBuild>
+# cmake -DCMAKE_TOOLCHAIN_FILE:STRING=<EMSDK_PATH>/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DBuildTarget:String=<BuildVer> -G "Unix Makefiles"|"ninja" -B<FolderToBuild>
 #   where:
 #       <EMSDK_PATH> is where was installed EMSCRIPTEN: you need to have it in EMSDK environment variable
 #       <BuildVer> must be one of follow strings:
