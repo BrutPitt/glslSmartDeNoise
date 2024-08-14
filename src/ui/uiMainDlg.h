@@ -1,16 +1,15 @@
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//------------------------------------------------------------------------------
 #pragma once
 
 #ifdef GLAPP_USE_IMGUI

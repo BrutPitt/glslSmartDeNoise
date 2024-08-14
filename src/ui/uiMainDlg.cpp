@@ -1,17 +1,15 @@
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+//------------------------------------------------------------------------------
 #ifdef GLAPP_USE_IMGUI
 
 #include <sstream>
@@ -20,6 +18,7 @@
 
 
 #include "../glApp.h"
+#include "tinyFileDialog/tinyfiledialogs.h"
 
 #ifdef GLAPP_TEST
     #include "../glWindow_test.h"
@@ -39,6 +38,8 @@
 #include <imgui/imgui_internal.h>
 using namespace ImGui;
 
+void buildImage(const char *filename, int index);
+
 void mainImGuiDlgClass::renderImGui()
 {
 
@@ -49,7 +50,8 @@ void mainImGuiDlgClass::renderImGui()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuiStyle& style = ImGui::GetStyle();
-    float sizeY = theWnd->getDeNoise().useTest ? 12 : 9;
+    float addSpace = theWnd->getDeNoise().getTexture().whichImg==3 ? 2 : 0;
+    float sizeY = (theWnd->getDeNoise().useTest ? 13 : 9) + addSpace;
            
 
 
@@ -105,8 +107,22 @@ void mainImGuiDlgClass::renderImGui()
             ImGui::Combo(" Images", &theWnd->getDeNoise().getTexture().whichImg,
                                          "Tree - daylight\0"\
                                          "Tree - sunset\0"\
-                                         "Runner - on the beach\0");
-
+                                         "Runner - on the beach\0"
+#if !defined(__EMSCRIPTEN__)
+                                         "my Loaded Image...\0"
+#endif
+                                         );
+#if !defined(__EMSCRIPTEN__)
+            if(theWnd->getDeNoise().getTexture().whichImg == 3) {
+                if(ImGui::Button(" Load PNG Image ")) {
+                    char const * patterns[] = { "*.png" };
+                    const int numPattern = 1;
+                    const char *startDir = "./";
+                    const char *fileName = tinyfd_openFileDialog("Load File...", startDir, numPattern, patterns, NULL, 0);
+                    buildImage(fileName, 3);
+                }
+            }
+#endif
             NewLine();
             ImGui::Checkbox(" Test other spaces...", &theWnd->getDeNoise().useTest);
 
@@ -114,11 +130,18 @@ void mainImGuiDlgClass::renderImGui()
                 NewLine();
                 ImGui::PushItemWidth(w);
                 ImGui::Combo("##SpaceType", &theWnd->getDeNoise().whichTest,
+                                             "mix LowHi freq\0"\
                                              "sRGB (gamma correction)\0"\
                                              "Luminance\0"\
                                              "linear Luminance\0"\
                                              "HSL \0");
-                                             
+
+                if(theWnd->getDeNoise().whichTest == wTest::LowHi) {
+                    ImGui::DragFloat("##mixLowHi",&theWnd->getDeNoise().lowHi, .001, 0.0, 1.0, "low <==> hi %.3f");
+                    ImGui::DragFloat("##gamma",&theWnd->getDeNoise().gamma, .01, 1.0, 15.0, "gamma %.3f");
+//                    ImGui::SameLine();
+                }
+
                 if(theWnd->getDeNoise().whichTest == wTest::sRGB) {
                     ImGui::DragFloat("##gamma",&theWnd->getDeNoise().gamma, .01, 1.0, 15.0, "gamma %.3f");
 //                    ImGui::SameLine();
