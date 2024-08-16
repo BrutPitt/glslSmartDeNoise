@@ -1,17 +1,16 @@
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#line 15    //#version dynamically inserted
+//------------------------------------------------------------------------------
+#line 13    //#version dynamically inserted
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  glslSmartDeNoise
@@ -33,6 +32,7 @@ uniform float uSigma;
 uniform float uThreshold;
 uniform float uSlider;
 uniform float uKSigma;
+uniform float lowHi;
 uniform vec2 wSize;
 
 #define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
@@ -147,18 +147,103 @@ vec4 smartDeNoise(sampler2D tex, vec2 uv, float sigma, float kSigma, float thres
 //
 //          fXY = exp( -dot(k,k) * invSigmaQx2) * invSigmaQx2PI
 
+uniform float invGamma;
+uniform bool useTest;
+uniform int whichTest;
+
+vec4 smartDeNoiseLowHi(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
+{
+    float radius = round(kSigma*sigma);
+    float radQ = radius * radius;
+
+    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
+    float invSigmaQx2PI = INV_PI * invSigmaQx2;    // // 1/(2 * PI * sigma^2)
+
+    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
+    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma)
+
+    vec4 centrPx = texture(tex,uv);
+    vec4 centrPxNeg = vec4(pow(centrPx.rgb, vec3(invGamma)), centrPx.a);
+
+    float zBuff = 0.0, zBuffNeg = 0.0;
+    vec4 aBuff = vec4(0.0);
+    vec4 aBuffNeg = vec4(0.0);
+    vec2 size = vec2(textureSize(tex, 0));
+
+    vec2 d;
+    for (d.x=-radius; d.x <= radius; d.x++) {
+        float pt = sqrt(radQ-d.x*d.x);       // pt = yRadius: have circular trend
+        for (d.y=-pt; d.y <= pt; d.y++) {
+            float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
+
+            vec4 walkPx =  texture(tex,uv+d/size);
+            vec4 walkPxNeg =  walkPx;
+
+            vec4 dC = walkPx-centrPx;
+            vec4 dCNeg = walkPxNeg-centrPxNeg;
+
+            float K = invThresholdSqrt2PI * blurFactor;
+
+            float deltaFactor = exp( -dot(dC.rgb, dC.rgb) * invThresholdSqx2) * K;
+            float deltaFactorNeg = exp( -dot(dCNeg.rgb, dCNeg.rgb) * invThresholdSqx2) * K;
+
+            zBuffNeg += deltaFactorNeg;
+            aBuffNeg += deltaFactorNeg*walkPxNeg;
+
+            zBuff += deltaFactor;
+            aBuff += deltaFactor*walkPx;
+        }
+    }
+    return mix(aBuff/zBuff, aBuffNeg/zBuffNeg, lowHi);
+}
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  End glslSmartDeNoise
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+float smartDeNoise_GrayScaleImage(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
+{
+    float radius = round(kSigma*sigma);
+    float radQ = radius * radius;
+
+    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
+    float invSigmaQx2PI = INV_PI * invSigmaQx2;    // // 1/(2 * PI * sigma^2)
+
+    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
+    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma)
+
+    float centrPx = texture(tex,uv).r;
+
+    float zBuff = 0.0;
+    float aBuff = 0.0;
+    vec2 size = vec2(textureSize(tex, 0));
+
+    vec2 d;
+    for (d.x=-radius; d.x <= radius; d.x++) {
+        float pt = sqrt(radQ-d.x*d.x);       // pt = yRadius: have circular trend
+        for (d.y=-pt; d.y <= pt; d.y++) {
+            float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
+
+            float walkPx =  texture(tex,uv+d/size).r;
+
+            float dC = walkPx-centrPx;
+            float deltaFactor = exp( -(dC*dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
+
+            zBuff += deltaFactor;
+            aBuff += deltaFactor*walkPx;
+        }
+    }
+    return aBuff/zBuff;
+}
+
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  Testing other color spaces
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-uniform float invGamma;
-uniform bool useTest;
-uniform int whichTest;
 
 #ifdef GL_ES
 #define saturate(v) clamp(v, vec3(0.0), vec3(1.0))
@@ -289,13 +374,17 @@ vec4 smartDeNoise_lum(sampler2D tex, vec2 uv, float sigma, float kSigma, float t
 vec4 smartDeNoise_test(sampler2D tex, vec2 uv, float sigma, float kSigma, float threshold)
 {
     switch(whichTest) {
-        case 0: //sRGB
-            return smartDeNoise_sRGB(imageData, uv, uSigma, uKSigma, uThreshold);
-        case 1: //luminance
-        case 2: //linear Luminance
-            return smartDeNoise_lum(imageData, uv, uSigma, uKSigma, uThreshold);
         default:
-        case 3:
+        case 0:
+            //return smartDeNoiseLowHi(imageData, uv, uSigma, uKSigma, uThreshold);
+        return vec4(smartDeNoise_GrayScaleImage(imageData, uv, uSigma, uKSigma, uThreshold), vec3(0.0));
+
+        case 1: //sRGB
+            return smartDeNoise_sRGB(imageData, uv, uSigma, uKSigma, uThreshold);
+        case 2: //luminance
+        case 3: //linear Luminance
+            return smartDeNoise_lum(imageData, uv, uSigma, uKSigma, uThreshold);
+        case 4:
             return smartDeNoise_HSL(imageData, uv, uSigma, uKSigma, uThreshold);
     }
 }
@@ -307,7 +396,7 @@ void main(void)
     vec2 uv = vec2(gl_FragCoord.xy / wSize);
 
     vec4 c = useTest ?  smartDeNoise_test(imageData, vec2(uv.x,1.0-uv.y), uSigma, uKSigma, uThreshold) :
-                        smartDeNoise     (imageData, vec2(uv.x,1.0-uv.y), uSigma, uKSigma, uThreshold);
+                        smartDeNoise(imageData, vec2(uv.x,1.0-uv.y), uSigma, uKSigma, uThreshold);
 
     color = uv.x<slide-szSlide  ? texture(imageData, vec2(uv.x,1.0-uv.y)) :
                                  (uv.x>slide+szSlide ? c : vec4(1.0));
