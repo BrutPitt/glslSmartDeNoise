@@ -1,16 +1,15 @@
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//------------------------------------------------------------------------------
 #pragma once
 
 #include "glApp.h"
@@ -36,7 +35,7 @@ template<> void IntDataHelper<8>()
 inline void IntData() { IntDataHelper<sizeof(size_t)>(); }
 */
 
-#define NUM_TEXTURES 3
+#define NUM_TEXTURES 4
 
 #include <cstdint>
 #if INTPTR_MAX == INT32_MAX 
@@ -47,7 +46,7 @@ inline void IntData() { IntDataHelper<sizeof(size_t)>(); }
     #error "Environment not 32 or 64-bit."
 #endif
 
-enum wTest { sRGB, luminance, linearLuminance, HSL };
+enum wTest { LowHi, sRGB, luminance, linearLuminance, HSL };
 
 class vaoClass {
 public:
@@ -150,6 +149,7 @@ public:
         locInvGamma = glGetUniformLocation(program, "invGamma");
         locUseTest = glGetUniformLocation(program, "useTest");
         locWhichTest = glGetUniformLocation(program, "whichTest");
+        locLowHi = glGetUniformLocation(program, "lowHi");
 
 #if !defined(GLAPP_REQUIRE_OGL45)
         bindShaderProg();
@@ -185,17 +185,18 @@ public:
 
     GLfloat slider = 0.f;
 
-    GLfloat aSigma[NUM_TEXTURES] = {9.f, 7.f, 7.f};
-    GLfloat aThreshold[NUM_TEXTURES] = {.180f, .195f, .180f};
-    GLfloat aKSigma[NUM_TEXTURES] = {3.f, 3.f, 2.f};
+    GLfloat aSigma[NUM_TEXTURES] = {9.f, 7.f, 7.f, 7.f};
+    GLfloat aThreshold[NUM_TEXTURES] = {.180f, .195f, .180f, .1f};
+    GLfloat aKSigma[NUM_TEXTURES] = {3.f, 3.f, 2.f, 3.f};
     GLfloat gamma = 2.2;
+    GLfloat lowHi = .5;
     bool useTest = false;
     GLint whichTest = 0;
 
 private:
     textureBaseClass texture;
 
-    GLuint locSigma,locThreshold, locWSize, locSlider, locKSigma, locInvGamma, locUseTest, locWhichTest, locImgData;
+    GLuint locSigma,locThreshold, locWSize, locSlider, locKSigma, locInvGamma, locUseTest, locWhichTest, locImgData, locLowHi;
     vaoClass vao;
 
 };

@@ -1,16 +1,15 @@
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  Copyright (c) 2018-2019 Michele Morrone
+//------------------------------------------------------------------------------
+//  Copyright (c) 2018-2024 Michele Morrone
 //  All rights reserved.
 //
-//  https://michelemorrone.eu - https://BrutPitt.com
+//  https://michelemorrone.eu - https://brutpitt.com
 //
-//  me@michelemorrone.eu - brutpitt@gmail.com
-//  twitter: @BrutPitt - github: BrutPitt
-//  
-//  https://github.com/BrutPitt/glslSmartDeNoise/
+//  X: https://x.com/BrutPitt - GitHub: https://github.com/BrutPitt
+//
+//  direct mail: brutpitt(at)gmail.com - me(at)michelemorrone.eu
 //
 //  This software is distributed under the terms of the BSD 2-Clause license
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//------------------------------------------------------------------------------
 #include <vgMath.h>
 
 #include <lodePNG/lodepng.h>
@@ -87,6 +86,7 @@ void deNoiseClass::render()
     glUniform1f(locInvGamma, 1.0/gamma);
     glUniform1i(locUseTest, useTest);
     glUniform1i(locWhichTest, whichTest);
+    glUniform1f(locLowHi, lowHi);
     glUniform2f(locWSize,theApp->GetWidth(),theApp->GetHeight());
     
 #ifdef GLAPP_REQUIRE_OGL45
@@ -110,11 +110,23 @@ glWindow::~glWindow() {}
 
 #define IMG_IDX 2
 
+
+void buildImage(const char *filename, int index)
+{
+    std::vector<unsigned char> image;
+    unsigned width, height;
+
+    lodepng::decode(image, width, height, filename);
+        //ivec2 size(x,y);
+
+    theWnd->getDeNoise().getTexture().buildTex(index, image.data(), width, height);
+}
+
+
 //
 /////////////////////////////////////////////////
 void glWindow::onInit()
 {
-    std::vector<unsigned char> image;
     unsigned x = 1280,y = 800;
 
     deNoise = new deNoiseClass;
@@ -122,17 +134,12 @@ void glWindow::onInit()
     //getDeNoise().sigma = getDeNoise().aSigma[IMG_IDX];
     //getDeNoise().threshold = getDeNoise().aThreshold[IMG_IDX];
     //getDeNoise().kSigma = getDeNoise().aKSigma[IMG_IDX];
-
     char str[32];
     for(int i=0; i<NUM_TEXTURES; i++) {
         sprintf(str,"image%d.png",i);
-        lodepng::decode(image, x, y, str);
-        //ivec2 size(x,y);
-
-    //glViewport(0, 0, theApp->GetWidth(), theApp->GetWidth());
-        getDeNoise().getTexture().buildTex(i, image.data(), x, y);
-        image.clear();
+        buildImage(str, i);
     }
+
     glfwSetWindowSize(theApp->getGLFWWnd(),x,y);
     theApp->SetWidth(x); theApp->SetHeight(y);
     glViewport(0, 0, x, y);
